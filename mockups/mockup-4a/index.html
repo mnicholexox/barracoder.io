@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barracoder Security — Penetration Testing That Drives Compliance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* =========================================
+       RESET & BASE
+       ========================================= */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0B0D17;
+      color: #FFFFFF;
+      line-height: 1.7;
+      overflow-x: hidden;
+      font-weight: 400;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      transition: color 0.3s ease;
+    }
+
+    img { max-width: 100%; display: block; }
+    ul { list-style: none; }
+    button, input, textarea, select {
+      font-family: inherit;
+      border: none;
+      outline: none;
+      background: none;
+    }
+
+    /* =========================================
+       UTILITIES
+       ========================================= */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .container--wide {
+      max-width: 1400px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .btn-gradient {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 24px rgba(59, 130, 246, 0.3);
+      border: none;
+    }
+
+    .btn-gradient:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.45);
+    }
+
+    .btn-glass {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-glass:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #94A3B8;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 16px;
+    }
+
+    .section-heading {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-sub {
+      color: #94A3B8;
+      font-size: 1.05rem;
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      transition: all 0.35s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.16);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    }
+
+    /* =========================================
+       BACKGROUND GRADIENT MESH
+       ========================================= */
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(160px);
+      opacity: 0.15;
+    }
+
+    .bg-orb--1 {
+      width: 700px;
+      height: 700px;
+      background: #3B82F6;
+      top: -15%;
+      right: -10%;
+      animation: orbFloat1 25s ease-in-out infinite;
+    }
+
+    .bg-orb--2 {
+      width: 600px;
+      height: 600px;
+      background: #7C3AED;
+      bottom: -10%;
+      left: -10%;
+      animation: orbFloat2 30s ease-in-out infinite;
+    }
+
+    .bg-orb--3 {
+      width: 500px;
+      height: 500px;
+      background: #3B82F6;
+      top: 40%;
+      left: 30%;
+      opacity: 0.08;
+      animation: orbFloat3 22s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-60px, 40px) scale(1.05); }
+      66% { transform: translate(30px, -30px) scale(0.95); }
+    }
+
+    @keyframes orbFloat2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(50px, -50px) scale(1.08); }
+      66% { transform: translate(-40px, 30px) scale(0.96); }
+    }
+
+    @keyframes orbFloat3 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(60px, -40px); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================
+       HEADER — Full-width transparent bar
+       ========================================= */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(11, 13, 23, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, #3B82F6, #7C3AED);
+      opacity: 0.5;
+    }
+
+    .header__inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      padding: 0 32px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .logo__icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .nav__links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav__link {
+      color: #94A3B8;
+      font-size: 0.9rem;
+      font-weight: 500;
+      position: relative;
+      padding: 4px 0;
+    }
+
+    .nav__link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      border-radius: 1px;
+      transition: width 0.3s ease;
+    }
+
+    .nav__link:hover { color: #fff; }
+    .nav__link:hover::after { width: 100%; }
+
+    .nav__cta {
+      padding: 10px 22px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .mobile-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(11, 13, 23, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .mobile-nav.active { display: flex; }
+
+    .mobile-nav a {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #94A3B8;
+      transition: color 0.3s ease;
+    }
+
+    .mobile-nav a:hover { color: #fff; }
+
+    .mobile-nav__close {
+      position: absolute;
+      top: 28px;
+      right: 32px;
+      font-size: 1.6rem;
+      color: #94A3B8;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .mobile-nav__close:hover { color: #fff; }
+
+    /* =========================================
+       HERO — 50/50 Split Screen
+       ========================================= */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    .hero__left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 120px 64px 80px;
+      max-width: 50%;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #94A3B8;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 32px;
+      width: fit-content;
+      animation: fadeInUp 0.7s ease forwards;
+    }
+
+    .hero__badge i {
+      color: #3B82F6;
+      font-size: 0.75rem;
+    }
+
+    .hero__heading {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.7s 0.1s ease forwards;
+      opacity: 0;
+    }
+
+    .hero__sub {
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      color: #94A3B8;
+      max-width: 480px;
+      line-height: 1.75;
+      margin-bottom: 40px;
+      animation: fadeInUp 0.7s 0.2s ease forwards;
+      opacity: 0;
+    }
+
+    .hero__buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.7s 0.3s ease forwards;
+      opacity: 0;
+    }
+
+    /* Hero Right — Security Radar Visualization */
+    .hero__right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      max-width: 50%;
+      overflow: hidden;
+    }
+
+    .radar-viz {
+      position: relative;
+      width: 420px;
+      height: 420px;
+    }
+
+    /* 6x6 Grid of pulsing squares */
+    .radar-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 12px;
+      padding: 40px;
+      z-index: 1;
+    }
+
+    .radar-cell {
+      border-radius: 4px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: all 0.6s ease;
+    }
+
+    .radar-cell--active {
+      animation: cellPulse 3s ease-in-out infinite;
+    }
+
+    .radar-cell--blue {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+    }
+
+    .radar-cell--purple {
+      background: rgba(124, 58, 237, 0.15);
+      border-color: rgba(124, 58, 237, 0.3);
+      box-shadow: 0 0 12px rgba(124, 58, 237, 0.2);
+    }
+
+    @keyframes cellPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .radar-cell:nth-child(3).radar-cell--active { animation-delay: 0s; }
+    .radar-cell:nth-child(7).radar-cell--active { animation-delay: 0.4s; }
+    .radar-cell:nth-child(12).radar-cell--active { animation-delay: 0.8s; }
+    .radar-cell:nth-child(16).radar-cell--active { animation-delay: 1.2s; }
+    .radar-cell:nth-child(20).radar-cell--active { animation-delay: 0.2s; }
+    .radar-cell:nth-child(22).radar-cell--active { animation-delay: 1.6s; }
+    .radar-cell:nth-child(25).radar-cell--active { animation-delay: 0.6s; }
+    .radar-cell:nth-child(29).radar-cell--active { animation-delay: 1.0s; }
+    .radar-cell:nth-child(33).radar-cell--active { animation-delay: 1.4s; }
+    .radar-cell:nth-child(35).radar-cell--active { animation-delay: 0.3s; }
+    .radar-cell:nth-child(10).radar-cell--active { animation-delay: 1.8s; }
+    .radar-cell:nth-child(14).radar-cell--active { animation-delay: 2.0s; }
+
+    /* Rotating Ring */
+    .radar-ring {
+      position: absolute;
+      inset: 20px;
+      border: 2px solid transparent;
+      border-radius: 50%;
+      z-index: 2;
+      animation: radarSpin 20s linear infinite;
+      background: conic-gradient(from 0deg, rgba(59,130,246,0.4), rgba(124,58,237,0.4), rgba(59,130,246,0.1), transparent 70%) border-box;
+      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+
+    .radar-ring-inner {
+      position: absolute;
+      inset: 60px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 50%;
+      z-index: 2;
+    }
+
+    @keyframes radarSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Shield Icon center */
+    .radar-shield {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(11, 13, 23, 0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: #3B82F6;
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);
+    }
+
+    /* =========================================
+       TRUST BAR — Scrolling Ticker
+       ========================================= */
+    .trust-ticker {
+      position: relative;
+      z-index: 1;
+      padding: 28px 0;
+      overflow: hidden;
+      background: rgba(255,255,255,0.02);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .trust-ticker__track {
+      display: flex;
+      width: max-content;
+      animation: tickerScroll 30s linear infinite;
+    }
+
+    .trust-ticker__set {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .trust-ticker__item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 32px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #CBD5E1;
+      white-space: nowrap;
+    }
+
+    .trust-ticker__item i {
+      font-size: 1rem;
+    }
+
+    .pill-icon--pci { color: #3B82F6; }
+    .pill-icon--soc { color: #7C3AED; }
+    .pill-icon--hipaa { color: #10B981; }
+    .pill-icon--nist { color: #F59E0B; }
+    .pill-icon--iso { color: #EF4444; }
+
+    .trust-ticker__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+      flex-shrink: 0;
+    }
+
+    @keyframes tickerScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* =========================================
+       SERVICES — Horizontal Scroll Cards
+       ========================================= */
+    .services {
+      position: relative;
+      z-index: 1;
+      padding: 100px 0;
+    }
+
+    .services__header {
+      margin-bottom: 48px;
+      padding: 0 24px;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .services__scroll-wrap {
+      position: relative;
+    }
+
+    .services__scroll {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 0 24px 24px;
+      max-width: 1400px;
+      margin: 0 auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .services__scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .services__fade {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 24px;
+      width: 100px;
+      background: linear-gradient(90deg, transparent, #0B0D17);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .service-card {
+      flex-shrink: 0;
+      width: 280px;
+      min-height: 400px;
+      padding: 32px 28px;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      cursor: default;
+    }
+
+    .service-card__icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(124,58,237,0.2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #3B82F6;
+      margin-bottom: 24px;
+    }
+
+    .service-card__title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .service-card__desc {
+      color: #94A3B8;
+      font-size: 0.88rem;
+      line-height: 1.65;
+      margin-bottom: auto;
+      padding-bottom: 24px;
+    }
+
+    .service-card__link {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #3B82F6;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: gap 0.3s ease;
+    }
+
+    .service-card:hover .service-card__link {
+      gap: 10px;
+    }
+
+    .service-card:hover .service-card__icon {
+      background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(124,58,237,0.3));
+    }
+
+    /* =========================================
+       FEATURES — Zigzag Alternating Rows
+       ========================================= */
+    .features {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0 100px;
+    }
+
+    .features__header {
+      text-align: center;
+      margin-bottom: 72px;
+    }
+
+    .zigzag-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .zigzag-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .zigzag-row__content {
+      flex: 0 0 60%;
+      padding: 48px;
+    }
+
+    .zigzag-row__number {
+      flex: 0 0 40%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .zigzag-row__number span {
+      font-size: 15rem;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0.05;
+      user-select: none;
+    }
+
+    .zigzag-row--reverse {
+      flex-direction: row-reverse;
+    }
+
+    .zigzag-row__icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3B82F6;
+      font-size: 1.15rem;
+      margin-bottom: 20px;
+    }
+
+    .zigzag-row__title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .zigzag-row__desc {
+      color: #94A3B8;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      max-width: 480px;
+    }
+
+    /* =========================================
+       PROCESS — Vertical Timeline
+       ========================================= */
+    .process {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0 100px;
+    }
+
+    .process__header {
+      text-align: center;
+      margin-bottom: 72px;
+    }
+
+    .timeline {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      padding-left: 60px;
+    }
+
+    /* Glowing vertical line */
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 28px;
+      width: 2px;
+      background: linear-gradient(180deg, #3B82F6, #7C3AED, #3B82F6, #7C3AED);
+      border-radius: 1px;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .timeline__step {
+      position: relative;
+      padding: 0 0 64px 40px;
+    }
+
+    .timeline__step:last-child {
+      padding-bottom: 0;
+    }
+
+    /* Alternating indentation */
+    .timeline__step:nth-child(even) {
+      padding-left: 64px;
+    }
+
+    /* Node circle */
+    .timeline__node {
+      position: absolute;
+      left: -32px;
+      top: 4px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #fff;
+      z-index: 2;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
+    }
+
+    .timeline__step:nth-child(even) .timeline__node {
+      left: -56px;
+    }
+
+    .timeline__title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .timeline__desc {
+      font-size: 0.92rem;
+      color: #94A3B8;
+      line-height: 1.7;
+      max-width: 480px;
+    }
+
+    /* =========================================
+       COMPLIANCE — Accordion Rows
+       ========================================= */
+    .compliance {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0 100px;
+    }
+
+    .compliance__header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .accordion__item {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.35s ease;
+    }
+
+    .accordion__item:hover {
+      border-color: rgba(255,255,255,0.16);
+    }
+
+    .accordion__item[open] {
+      border-color: rgba(255,255,255,0.12);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .accordion__summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    .accordion__summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .accordion__summary::marker {
+      display: none;
+      content: '';
+    }
+
+    .accordion__left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .accordion__indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .accordion__indicator--blue { background: #3B82F6; box-shadow: 0 0 12px rgba(59,130,246,0.4); }
+    .accordion__indicator--purple { background: #7C3AED; box-shadow: 0 0 12px rgba(124,58,237,0.4); }
+    .accordion__indicator--green { background: #10B981; box-shadow: 0 0 12px rgba(16,185,129,0.4); }
+    .accordion__indicator--amber { background: #F59E0B; box-shadow: 0 0 12px rgba(245,158,11,0.4); }
+    .accordion__indicator--red { background: #EF4444; box-shadow: 0 0 12px rgba(239,68,68,0.4); }
+
+    .accordion__name {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .accordion__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .control-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #CBD5E1;
+    }
+
+    .accordion__chevron {
+      color: #64748B;
+      font-size: 0.8rem;
+      transition: transform 0.3s ease;
+      margin-left: 20px;
+      flex-shrink: 0;
+    }
+
+    .accordion__item[open] .accordion__chevron {
+      transform: rotate(180deg);
+    }
+
+    .accordion__body {
+      padding: 0 28px 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      margin: 0 16px;
+      padding-top: 20px;
+    }
+
+    .accordion__body p {
+      color: #94A3B8;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    /* =========================================
+       CTA — Split layout
+       ========================================= */
+    .cta {
+      position: relative;
+      z-index: 1;
+      padding: 100px 0;
+      overflow: hidden;
+    }
+
+    .cta__orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      pointer-events: none;
+    }
+
+    .cta__orb--1 {
+      width: 500px;
+      height: 500px;
+      background: #3B82F6;
+      opacity: 0.12;
+      top: -30%;
+      left: 10%;
+    }
+
+    .cta__orb--2 {
+      width: 400px;
+      height: 400px;
+      background: #7C3AED;
+      opacity: 0.1;
+      bottom: -30%;
+      right: 10%;
+    }
+
+    .cta__heading {
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 48px;
+      text-align: center;
+    }
+
+    .cta__split {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .cta__split-left {
+      flex: 1;
+      padding-right: 48px;
+    }
+
+    .cta__split-left p {
+      color: #94A3B8;
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .cta__split-divider {
+      width: 1px;
+      align-self: stretch;
+      background: linear-gradient(180deg, #3B82F6, #7C3AED);
+      opacity: 0.4;
+      flex-shrink: 0;
+    }
+
+    .cta__split-right {
+      flex: 1;
+      padding-left: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .cta__note {
+      color: #64748B;
+      font-size: 0.85rem;
+    }
+
+    /* =========================================
+       CONTACT — Two-Column Layout
+       ========================================= */
+    .contact {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0 100px;
+    }
+
+    .contact__inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .contact__info {
+      position: relative;
+      padding: 40px 0;
+    }
+
+    .contact__info-bg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14rem;
+      opacity: 0.03;
+      color: #fff;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .contact__info-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .contact__details {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .contact__detail {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .contact__detail-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3B82F6;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .contact__detail-text {
+      color: #CBD5E1;
+      font-size: 0.95rem;
+    }
+
+    .contact__detail-label {
+      color: #64748B;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+
+    .contact__form-wrap {
+      padding: 36px 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #CBD5E1;
+      margin-bottom: 8px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: #475569;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: rgba(59,130,246,0.5);
+      background: rgba(255,255,255,0.07);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+
+    .form-select option {
+      background: #10132A;
+      color: #fff;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-submit {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    /* =========================================
+       FOOTER — Minimal Single Row
+       ========================================= */
+    .footer {
+      position: relative;
+      z-index: 1;
+      padding: 0;
+      border-top: 1px solid transparent;
+      background-image: linear-gradient(#0B0D17, #0B0D17), linear-gradient(90deg, #3B82F6, #7C3AED, #3B82F6);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+
+    .footer__row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0;
+    }
+
+    .footer__nav {
+      display: flex;
+      gap: 32px;
+    }
+
+    .footer__nav a {
+      color: #64748B;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .footer__nav a:hover { color: #fff; }
+
+    .footer__socials {
+      display: flex;
+      gap: 12px;
+    }
+
+    .footer__social {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748B;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+
+    .footer__social:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+
+    .footer__copy {
+      text-align: center;
+      padding: 16px 0 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #475569;
+      font-size: 0.8rem;
+    }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @media (max-width: 1024px) {
+      .hero {
+        flex-direction: column;
+        min-height: auto;
+      }
+
+      .hero__left {
+        max-width: 100%;
+        padding: 120px 32px 48px;
+      }
+
+      .hero__right {
+        max-width: 100%;
+        padding: 0 32px 64px;
+      }
+
+      .radar-viz {
+        width: 320px;
+        height: 320px;
+      }
+
+      .zigzag-row {
+        flex-direction: column !important;
+      }
+
+      .zigzag-row__content {
+        flex: 1;
+        width: 100%;
+        padding: 32px 24px;
+      }
+
+      .zigzag-row__number {
+        flex: 1;
+        width: 100%;
+      }
+
+      .zigzag-row__number span {
+        font-size: 10rem;
+      }
+
+      .contact__inner {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .cta__split {
+        flex-direction: column;
+        gap: 32px;
+        text-align: center;
+      }
+
+      .cta__split-left {
+        padding-right: 0;
+      }
+
+      .cta__split-divider {
+        width: 80px;
+        height: 1px;
+        background: linear-gradient(90deg, #3B82F6, #7C3AED);
+      }
+
+      .cta__split-right {
+        padding-left: 0;
+        align-items: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav__links,
+      .nav__cta {
+        display: none;
+      }
+
+      .mobile-toggle {
+        display: flex;
+      }
+
+      .hero__left {
+        padding: 100px 24px 40px;
+      }
+
+      .hero__heading {
+        font-size: clamp(2rem, 8vw, 2.8rem);
+      }
+
+      .radar-viz {
+        width: 260px;
+        height: 260px;
+      }
+
+      .radar-grid {
+        gap: 6px;
+        padding: 24px;
+      }
+
+      .radar-shield {
+        width: 52px;
+        height: 52px;
+        font-size: 1.2rem;
+      }
+
+      .radar-ring-inner {
+        inset: 40px;
+      }
+
+      .radar-ring {
+        inset: 10px;
+      }
+
+      .services__scroll {
+        padding: 0 16px 16px;
+      }
+
+      .service-card {
+        width: 260px;
+        min-height: 360px;
+      }
+
+      .timeline {
+        padding-left: 48px;
+      }
+
+      .timeline::before {
+        left: 20px;
+      }
+
+      .timeline__node {
+        left: -28px;
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
+      }
+
+      .timeline__step:nth-child(even) {
+        padding-left: 40px;
+      }
+
+      .timeline__step:nth-child(even) .timeline__node {
+        left: -48px;
+      }
+
+      .accordion__summary {
+        padding: 16px 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .accordion__tags {
+        display: none;
+      }
+
+      .accordion__body {
+        padding: 0 20px 20px;
+        margin: 0 8px;
+      }
+
+      .contact__info-bg {
+        font-size: 8rem;
+      }
+
+      .contact__form-wrap {
+        padding: 28px 20px;
+      }
+
+      .footer__row {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .footer__nav {
+        gap: 24px;
+      }
+
+      .zigzag-row__number span {
+        font-size: 8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero__buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .hero__buttons .btn-gradient,
+      .hero__buttons .btn-glass {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .service-card {
+        width: 240px;
+        min-height: 340px;
+        padding: 24px 20px;
+      }
+
+      .zigzag-row__number span {
+        font-size: 6rem;
+      }
+
+      .footer__nav {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Gradient Mesh -->
+  <div class="bg-mesh" aria-hidden="true">
+    <div class="bg-orb bg-orb--1"></div>
+    <div class="bg-orb bg-orb--2"></div>
+    <div class="bg-orb bg-orb--3"></div>
+  </div>
+
+  <!-- ========== HEADER — Full-width transparent ========== -->
+  <header class="header">
+    <div class="header__inner">
+      <a href="#" class="logo">
+        <span class="logo__icon"><i class="fa-solid fa-lock"></i></span>
+        <span class="gradient-text">Barracoder</span>
+      </a>
+
+      <nav class="nav">
+        <ul class="nav__links">
+          <li><a href="#services" class="nav__link">Services</a></li>
+          <li><a href="#features" class="nav__link">Why Us</a></li>
+          <li><a href="#process" class="nav__link">Process</a></li>
+          <li><a href="#compliance" class="nav__link">Compliance</a></li>
+          <li><a href="#contact" class="nav__link">Contact</a></li>
+        </ul>
+        <a href="#contact" class="btn-gradient nav__cta">Start Assessment</a>
+      </nav>
+
+      <div class="mobile-toggle" onclick="document.querySelector('.mobile-nav').classList.add('active')" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <div class="mobile-nav">
+    <div class="mobile-nav__close" onclick="document.querySelector('.mobile-nav').classList.remove('active')" aria-label="Close menu">&times;</div>
+    <a href="#services" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Services</a>
+    <a href="#features" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Why Us</a>
+    <a href="#process" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Process</a>
+    <a href="#compliance" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Compliance</a>
+    <a href="#contact" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Contact</a>
+    <a href="#contact" class="btn-gradient" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Start Assessment</a>
+  </div>
+
+  <!-- ========== HERO — 50/50 Split ========== -->
+  <section class="hero">
+    <div class="hero__left">
+      <div class="hero__badge">
+        <i class="fa-solid fa-shield-halved"></i>
+        Trusted by 500+ organizations
+      </div>
+      <h1 class="hero__heading">
+        Penetration Testing<br>That <span class="gradient-text">Drives Compliance</span>
+      </h1>
+      <p class="hero__sub">
+        Modern security assessments built for organizations that demand rigor, transparency, and actionable results. Expert-led testing aligned to the frameworks that matter.
+      </p>
+      <div class="hero__buttons">
+        <a href="#contact" class="btn-gradient">
+          Get Started
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        <a href="#process" class="btn-glass">
+          <i class="fa-solid fa-play"></i>
+          Watch Demo
+        </a>
+      </div>
+    </div>
+
+    <div class="hero__right">
+      <div class="radar-viz">
+        <!-- 6x6 Grid -->
+        <div class="radar-grid">
+          <div class="radar-cell"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--blue"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell"></div>
+
+          <div class="radar-cell radar-cell--active radar-cell--purple"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--blue"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--purple"></div>
+
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--blue"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--purple"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell"></div>
+
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--blue"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--purple"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell"></div>
+
+          <div class="radar-cell radar-cell--active radar-cell--blue"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--blue"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell"></div>
+
+          <div class="radar-cell"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--purple"></div>
+          <div class="radar-cell"></div>
+          <div class="radar-cell radar-cell--active radar-cell--blue"></div>
+          <div class="radar-cell"></div>
+        </div>
+
+        <!-- Rotating ring -->
+        <div class="radar-ring"></div>
+        <div class="radar-ring-inner"></div>
+
+        <!-- Center shield -->
+        <div class="radar-shield">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TRUST BAR — Scrolling Ticker ========== -->
+  <section class="trust-ticker" aria-label="Compliance frameworks">
+    <div class="trust-ticker__track">
+      <!-- First set -->
+      <div class="trust-ticker__set">
+        <span class="trust-ticker__item"><i class="fa-solid fa-credit-card pill-icon--pci"></i> PCI DSS</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-clipboard-check pill-icon--soc"></i> SOC 2</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-heart-pulse pill-icon--hipaa"></i> HIPAA</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-building-columns pill-icon--nist"></i> NIST</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-certificate pill-icon--iso"></i> ISO 27001</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-credit-card pill-icon--pci"></i> PCI DSS</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-clipboard-check pill-icon--soc"></i> SOC 2</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-heart-pulse pill-icon--hipaa"></i> HIPAA</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-building-columns pill-icon--nist"></i> NIST</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-certificate pill-icon--iso"></i> ISO 27001</span>
+        <span class="trust-ticker__dot"></span>
+      </div>
+      <!-- Duplicate set for seamless loop -->
+      <div class="trust-ticker__set">
+        <span class="trust-ticker__item"><i class="fa-solid fa-credit-card pill-icon--pci"></i> PCI DSS</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-clipboard-check pill-icon--soc"></i> SOC 2</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-heart-pulse pill-icon--hipaa"></i> HIPAA</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-building-columns pill-icon--nist"></i> NIST</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-certificate pill-icon--iso"></i> ISO 27001</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-credit-card pill-icon--pci"></i> PCI DSS</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-clipboard-check pill-icon--soc"></i> SOC 2</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-heart-pulse pill-icon--hipaa"></i> HIPAA</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-building-columns pill-icon--nist"></i> NIST</span>
+        <span class="trust-ticker__dot"></span>
+        <span class="trust-ticker__item"><i class="fa-solid fa-certificate pill-icon--iso"></i> ISO 27001</span>
+        <span class="trust-ticker__dot"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SERVICES — Horizontal Scroll ========== -->
+  <section class="services" id="services">
+    <div class="services__header">
+      <span class="section-label"><i class="fa-solid fa-crosshairs"></i> Services</span>
+      <h2 class="section-heading">What We Test</h2>
+      <p class="section-sub">Comprehensive offensive security engagements across your entire attack surface.</p>
+    </div>
+
+    <div class="services__scroll-wrap">
+      <div class="services__scroll">
+        <!-- Card 1 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-globe"></i></div>
+          <h3 class="service-card__title">Web App Pentest</h3>
+          <p class="service-card__desc">Thorough testing of web applications against OWASP Top 10 and beyond. We uncover injection flaws, authentication bypasses, and business logic vulnerabilities.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 2 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+          <h3 class="service-card__title">Mobile App Pentest</h3>
+          <p class="service-card__desc">iOS and Android security assessments covering insecure data storage, certificate pinning, API communication, and reverse engineering resistance.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 3 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-plug"></i></div>
+          <h3 class="service-card__title">API Pentest</h3>
+          <p class="service-card__desc">REST, GraphQL, and gRPC API security testing. We probe authentication, authorization, rate limiting, and data exposure across your endpoints.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 4 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-cloud"></i></div>
+          <h3 class="service-card__title">Cloud Pentest</h3>
+          <p class="service-card__desc">AWS, Azure, and GCP infrastructure assessments. Misconfigurations, IAM weaknesses, storage exposure, and privilege escalation paths.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 5 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-brands fa-microsoft"></i></div>
+          <h3 class="service-card__title">M365 Pentest</h3>
+          <p class="service-card__desc">Microsoft 365 and Azure AD security assessments. We test tenant configurations, mailbox delegation, Teams security, and conditional access policies.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 6 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-code"></i></div>
+          <h3 class="service-card__title">Source Code Review</h3>
+          <p class="service-card__desc">Manual and tool-assisted source code analysis identifying security flaws before deployment. We review architecture patterns and cryptographic implementations.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+      <div class="services__fade" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- ========== FEATURES — Zigzag ========== -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features__header">
+        <span class="section-label"><i class="fa-solid fa-sparkles"></i> Why Barracoder</span>
+        <h2 class="section-heading">Security Meets <span class="gradient-text">Simplicity</span></h2>
+        <p class="section-sub" style="margin: 0 auto;">We combine deep offensive expertise with a modern delivery experience. No bloated PDFs, no vague findings — just clear, prioritized, actionable results.</p>
+      </div>
+
+      <!-- Block 1: Content LEFT, Number RIGHT -->
+      <div class="zigzag-row">
+        <div class="zigzag-row__content">
+          <div class="zigzag-row__icon"><i class="fa-solid fa-user-shield"></i></div>
+          <h3 class="zigzag-row__title">Expert-Led Testing</h3>
+          <p class="zigzag-row__desc">Every engagement is conducted by seasoned penetration testers with deep specialization — not automated scanners repackaged as assessments. Our team holds OSCP, OSWE, and CREST certifications.</p>
+        </div>
+        <div class="zigzag-row__number"><span>01</span></div>
+      </div>
+
+      <!-- Block 2: Number LEFT, Content RIGHT -->
+      <div class="zigzag-row zigzag-row--reverse">
+        <div class="zigzag-row__content">
+          <div class="zigzag-row__icon"><i class="fa-solid fa-list-check"></i></div>
+          <h3 class="zigzag-row__title">Compliance Mapped Results</h3>
+          <p class="zigzag-row__desc">Findings are mapped directly to the compliance controls that matter to your auditors — PCI DSS, SOC 2, HIPAA, and more — out of the box. No manual cross-referencing required.</p>
+        </div>
+        <div class="zigzag-row__number"><span>02</span></div>
+      </div>
+
+      <!-- Block 3: Content LEFT, Number RIGHT -->
+      <div class="zigzag-row">
+        <div class="zigzag-row__content">
+          <div class="zigzag-row__icon"><i class="fa-solid fa-wrench"></i></div>
+          <h3 class="zigzag-row__title">Actionable Remediation</h3>
+          <p class="zigzag-row__desc">Every finding includes precise remediation guidance with code snippets, configuration examples, and verification steps your team can act on immediately. No vague recommendations.</p>
+        </div>
+        <div class="zigzag-row__number"><span>03</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PROCESS — Vertical Timeline ========== -->
+  <section class="process" id="process">
+    <div class="container">
+      <div class="process__header">
+        <span class="section-label"><i class="fa-solid fa-route"></i> Methodology</span>
+        <h2 class="section-heading">How It Works</h2>
+        <p class="section-sub" style="margin: 0 auto;">A structured, transparent engagement process from scoping to verified remediation.</p>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline__step">
+          <div class="timeline__node">1</div>
+          <h3 class="timeline__title">Scope</h3>
+          <p class="timeline__desc">We define target assets, testing windows, compliance requirements, and rules of engagement collaboratively. Every engagement starts with a clear, mutually agreed scope document.</p>
+        </div>
+
+        <div class="timeline__step">
+          <div class="timeline__node">2</div>
+          <h3 class="timeline__title">Test</h3>
+          <p class="timeline__desc">Expert testers execute manual and tool-assisted testing, simulating real-world attacker techniques against your systems. You receive real-time updates through our secure portal.</p>
+        </div>
+
+        <div class="timeline__step">
+          <div class="timeline__node">3</div>
+          <h3 class="timeline__title">Report</h3>
+          <p class="timeline__desc">You receive a detailed report with prioritized findings, evidence, compliance mapping, and precise remediation guidance. Reports are delivered in both executive and technical formats.</p>
+        </div>
+
+        <div class="timeline__step">
+          <div class="timeline__node">4</div>
+          <h3 class="timeline__title">Remediate</h3>
+          <p class="timeline__desc">We verify your fixes with targeted retesting and provide an updated attestation letter for your auditors. Unlimited retesting is included within the engagement window.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== COMPLIANCE — Accordion ========== -->
+  <section class="compliance" id="compliance">
+    <div class="container">
+      <div class="compliance__header">
+        <span class="section-label"><i class="fa-solid fa-scale-balanced"></i> Frameworks</span>
+        <h2 class="section-heading">Built for <span class="gradient-text">Compliance</span></h2>
+        <p class="section-sub" style="margin: 0 auto;">Every assessment maps findings to the controls your auditors care about.</p>
+      </div>
+
+      <div class="accordion">
+        <!-- PCI DSS -->
+        <details class="accordion__item" open>
+          <summary class="accordion__summary">
+            <div class="accordion__left">
+              <span class="accordion__indicator accordion__indicator--blue"></span>
+              <span class="accordion__name">PCI DSS v4.0</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="accordion__tags">
+                <span class="control-tag">Req 6.2</span>
+                <span class="control-tag">Req 6.3</span>
+                <span class="control-tag">Req 11.3</span>
+                <span class="control-tag">Req 11.4</span>
+                <span class="control-tag">ASV Scans</span>
+              </div>
+              <i class="fa-solid fa-chevron-down accordion__chevron"></i>
+            </div>
+          </summary>
+          <div class="accordion__body">
+            <p>Complete penetration testing aligned to PCI DSS Requirements 6 and 11. We deliver the evidence and attestation artifacts your QSA needs for compliance validation. Our methodology covers network segmentation testing, application layer assessment, and internal/external vulnerability scans.</p>
+          </div>
+        </details>
+
+        <!-- SOC 2 -->
+        <details class="accordion__item">
+          <summary class="accordion__summary">
+            <div class="accordion__left">
+              <span class="accordion__indicator accordion__indicator--purple"></span>
+              <span class="accordion__name">SOC 2</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="accordion__tags">
+                <span class="control-tag">CC6.1</span>
+                <span class="control-tag">CC7.1</span>
+                <span class="control-tag">CC7.2</span>
+              </div>
+              <i class="fa-solid fa-chevron-down accordion__chevron"></i>
+            </div>
+          </summary>
+          <div class="accordion__body">
+            <p>Testing mapped to Trust Service Criteria for your Type II audit evidence. We focus on logical access controls, system monitoring, and vulnerability management controls that auditors specifically evaluate during SOC 2 examinations.</p>
+          </div>
+        </details>
+
+        <!-- HIPAA -->
+        <details class="accordion__item">
+          <summary class="accordion__summary">
+            <div class="accordion__left">
+              <span class="accordion__indicator accordion__indicator--green"></span>
+              <span class="accordion__name">HIPAA</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="accordion__tags">
+                <span class="control-tag">&sect;164.312(a)</span>
+                <span class="control-tag">&sect;164.312(e)</span>
+              </div>
+              <i class="fa-solid fa-chevron-down accordion__chevron"></i>
+            </div>
+          </summary>
+          <div class="accordion__body">
+            <p>Security Rule technical safeguard assessment covering ePHI protection. We evaluate access controls, audit controls, integrity controls, and transmission security to ensure your systems meet the requirements for protecting electronic protected health information.</p>
+          </div>
+        </details>
+
+        <!-- NIST -->
+        <details class="accordion__item">
+          <summary class="accordion__summary">
+            <div class="accordion__left">
+              <span class="accordion__indicator accordion__indicator--amber"></span>
+              <span class="accordion__name">NIST 800-53</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="accordion__tags">
+                <span class="control-tag">CA-8</span>
+                <span class="control-tag">RA-5</span>
+                <span class="control-tag">SI-3</span>
+              </div>
+              <i class="fa-solid fa-chevron-down accordion__chevron"></i>
+            </div>
+          </summary>
+          <div class="accordion__body">
+            <p>Control testing for federal and regulated environments. Our assessments align to NIST 800-53 security assessment and authorization controls, vulnerability scanning requirements, and malicious code protection standards required for FedRAMP and government systems.</p>
+          </div>
+        </details>
+
+        <!-- ISO 27001 -->
+        <details class="accordion__item">
+          <summary class="accordion__summary">
+            <div class="accordion__left">
+              <span class="accordion__indicator accordion__indicator--red"></span>
+              <span class="accordion__name">ISO 27001</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="accordion__tags">
+                <span class="control-tag">A.12.6</span>
+                <span class="control-tag">A.14.2</span>
+                <span class="control-tag">A.18.2</span>
+              </div>
+              <i class="fa-solid fa-chevron-down accordion__chevron"></i>
+            </div>
+          </summary>
+          <div class="accordion__body">
+            <p>Annex A control validation for ISMS certification support. We assess technical vulnerability management, secure development practices, and compliance with security policies to support your ISO 27001 certification and ongoing surveillance audits.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CTA — Split Layout ========== -->
+  <section class="cta">
+    <div class="cta__orb cta__orb--1" aria-hidden="true"></div>
+    <div class="cta__orb cta__orb--2" aria-hidden="true"></div>
+    <div class="container">
+      <h2 class="cta__heading">Ready to <span class="gradient-text">Elevate</span> Your Security?</h2>
+      <div class="cta__split">
+        <div class="cta__split-left">
+          <p>Talk to our team about a tailored penetration testing engagement built for your compliance requirements. We scope every engagement to your specific needs.</p>
+        </div>
+        <div class="cta__split-divider"></div>
+        <div class="cta__split-right">
+          <a href="#contact" class="btn-gradient" style="font-size: 1rem; padding: 16px 40px;">
+            Schedule a Consultation
+            <i class="fa-solid fa-arrow-right"></i>
+          </a>
+          <p class="cta__note">No commitment. Free consultation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CONTACT — Two Column ========== -->
+  <section class="contact" id="contact">
+    <div class="container">
+      <div class="contact__inner">
+        <!-- Left Column: Info -->
+        <div class="contact__info">
+          <div class="contact__info-bg" aria-hidden="true">
+            <i class="fa-solid fa-envelope"></i>
+          </div>
+          <div class="contact__info-content">
+            <span class="section-label"><i class="fa-solid fa-envelope"></i> Get In Touch</span>
+            <h2 class="section-heading">Start Your Assessment</h2>
+            <p class="section-sub">Tell us about your environment and we'll scope a tailored engagement within 24 hours.</p>
+
+            <div class="contact__details">
+              <div class="contact__detail">
+                <div class="contact__detail-icon">
+                  <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div>
+                  <div class="contact__detail-label">Email</div>
+                  <div class="contact__detail-text">hello@barracoder.io</div>
+                </div>
+              </div>
+              <div class="contact__detail">
+                <div class="contact__detail-icon">
+                  <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div>
+                  <div class="contact__detail-label">Location</div>
+                  <div class="contact__detail-text">Remote-first, US & EU based</div>
+                </div>
+              </div>
+              <div class="contact__detail">
+                <div class="contact__detail-icon">
+                  <i class="fa-solid fa-clock"></i>
+                </div>
+                <div>
+                  <div class="contact__detail-label">Response Time</div>
+                  <div class="contact__detail-text">Within 24 hours</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Form -->
+        <div class="glass-card contact__form-wrap">
+          <form onsubmit="return false;">
+            <div class="form-group">
+              <label class="form-label" for="name">Full Name</label>
+              <input type="text" id="name" class="form-input" placeholder="Jane Smith">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="email">Work Email</label>
+              <input type="email" id="email" class="form-input" placeholder="jane@company.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="company">Company</label>
+              <input type="text" id="company" class="form-input" placeholder="Acme Corp">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="service">Service Interest</label>
+              <select id="service" class="form-select">
+                <option value="" disabled selected>Select a service</option>
+                <option value="webapp">Web Application Pentest</option>
+                <option value="mobile">Mobile Application Pentest</option>
+                <option value="api">API Pentest</option>
+                <option value="cloud">Cloud Infrastructure Pentest</option>
+                <option value="m365">M365 / Azure AD Pentest</option>
+                <option value="code">Source Code Review</option>
+                <option value="multiple">Multiple Services</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="message">Message</label>
+              <textarea id="message" class="form-textarea" placeholder="Tell us about your environment, timeline, and compliance requirements..."></textarea>
+            </div>
+            <button type="submit" class="btn-gradient form-submit">
+              Send Request
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER — Minimal Single Row ========== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__row">
+        <a href="#" class="logo">
+          <span class="logo__icon"><i class="fa-solid fa-lock"></i></span>
+          <span class="gradient-text">Barracoder</span>
+        </a>
+
+        <nav class="footer__nav">
+          <a href="#services">Services</a>
+          <a href="#features">Why Us</a>
+          <a href="#contact">Contact</a>
+        </nav>
+
+        <div class="footer__socials">
+          <a href="#" class="footer__social" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+          <a href="#" class="footer__social" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" class="footer__social" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+          <a href="#" class="footer__social" aria-label="Mastodon"><i class="fa-brands fa-mastodon"></i></a>
+        </div>
+      </div>
+      <p class="footer__copy">&copy; 2026 Barracoder Security. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barracoder Security — Mockup Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #09090B;
+      color: #FAFAFA;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---- HEADER ---- */
+    .header {
+      padding: 48px 0 40px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .header-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+
+    .header h1 span {
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: #71717A;
+      font-size: 1.05rem;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    .badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: #A1A1AA;
+      letter-spacing: 0.02em;
+    }
+
+    /* ---- GALLERY ---- */
+    .gallery {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 64px;
+    }
+
+    .mockup-card {
+      background: #111113;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .mockup-card:hover {
+      border-color: rgba(99, 102, 241, 0.2);
+      box-shadow: 0 0 40px rgba(99, 102, 241, 0.05);
+    }
+
+    .mockup-card.is-original {
+      border-color: rgba(59, 130, 246, 0.15);
+    }
+
+    .original-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #3B82F6;
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.15);
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .original-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #3B82F6;
+    }
+
+    /* ---- PREVIEW ---- */
+    .preview-container {
+      position: relative;
+      width: 100%;
+      height: 600px;
+      background: #0A0A0A;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+
+    .preview-container iframe {
+      width: 1440px;
+      height: 900px;
+      border: none;
+      transform: scale(0.8889);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+
+    .preview-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .preview-overlay:hover {
+      background: rgba(99, 102, 241, 0.04);
+    }
+
+    .preview-overlay:hover .open-label {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .open-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 12px 28px;
+      border-radius: 999px;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* ---- CARD INFO ---- */
+    .card-info {
+      padding: 28px 32px 32px;
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .card-info-left {
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .card-number {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #71717A;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .card-description {
+      color: #A1A1AA;
+      font-size: 0.925rem;
+      line-height: 1.65;
+      max-width: 600px;
+    }
+
+    .card-info-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+      background: rgba(255,255,255,0.06);
+      color: #D4D4D8;
+    }
+
+    .view-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .view-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .view-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ---- LAYOUT HIGHLIGHTS ---- */
+    .layout-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .layout-chip {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(59,130,246,0.08);
+      color: #60A5FA;
+      border: 1px solid rgba(59,130,246,0.12);
+    }
+
+    /* ---- FOOTER ---- */
+    .footer {
+      text-align: center;
+      padding: 32px 24px 48px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #52525B;
+      font-size: 0.85rem;
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 1024px) {
+      .preview-container {
+        height: 480px;
+      }
+      .preview-container iframe {
+        width: 1280px;
+        height: 800px;
+        transform: scale(0.75);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header h1 { font-size: 1.55rem; }
+      .header p { font-size: 0.95rem; }
+
+      .gallery { padding: 32px 16px 64px; gap: 48px; }
+
+      .preview-container {
+        height: 320px;
+      }
+      .preview-container iframe {
+        width: 1280px;
+        height: 800px;
+        transform: scale(0.5);
+      }
+
+      .card-info {
+        flex-direction: column;
+        padding: 20px 20px 24px;
+      }
+
+      .card-info-right {
+        align-items: flex-start;
+      }
+
+      .tag-row { justify-content: flex-start; }
+    }
+
+    @media (max-width: 480px) {
+      .preview-container {
+        height: 240px;
+      }
+      .preview-container iframe {
+        transform: scale(0.35);
+      }
+
+      .card-title { font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <h1>Barracoder <span>Layout Gallery</span></h1>
+      <p>Same design system, same content -- five structurally different layouts. Click any preview to open the full mockup and explore.</p>
+      <div class="badge-row">
+        <span class="badge">1 Original + 4 Layout Variations</span>
+        <span class="badge">Same Colors & Fonts</span>
+        <span class="badge">Different Structure</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="gallery">
+
+    <!-- Original: Mockup 4 -->
+    <article class="mockup-card is-original">
+      <div class="preview-container">
+        <iframe src="mockup-4/index.html" loading="lazy" sandbox="allow-same-origin" title="Original Layout Preview"></iframe>
+        <a href="mockup-4/index.html" class="preview-overlay" target="_blank" rel="noopener">
+          <span class="open-label">Open Full Preview &rarr;</span>
+        </a>
+      </div>
+      <div class="card-info">
+        <div class="card-info-left">
+          <div class="original-badge">Original</div>
+          <div class="card-number">Mockup 4</div>
+          <h2 class="card-title">Centered SaaS Layout</h2>
+          <p class="card-description">The base design. Centered floating pill navbar, center-aligned hero, 3x2 service card grid, side-by-side features with CSS dashboard mockup, horizontal 4-step process flow, bento-grid compliance section, centered contact form card.</p>
+          <div class="layout-chips">
+            <span class="layout-chip">Floating Pill Nav</span>
+            <span class="layout-chip">Center-Aligned Hero</span>
+            <span class="layout-chip">3x2 Card Grid</span>
+            <span class="layout-chip">Bento Grid</span>
+            <span class="layout-chip">Horizontal Process Steps</span>
+          </div>
+        </div>
+        <div class="card-info-right">
+          <div class="tag-row">
+            <span class="tag">Symmetric</span>
+            <span class="tag">Multi-Column</span>
+          </div>
+          <a href="mockup-4/index.html" target="_blank" rel="noopener" class="view-btn">
+            View Original
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Variation A: Split-Screen & Horizontal Flow -->
+    <article class="mockup-card">
+      <div class="preview-container">
+        <iframe src="mockup-4a/index.html" loading="lazy" sandbox="allow-same-origin" title="Variation A Preview"></iframe>
+        <a href="mockup-4a/index.html" class="preview-overlay" target="_blank" rel="noopener">
+          <span class="open-label">Open Full Preview &rarr;</span>
+        </a>
+      </div>
+      <div class="card-info">
+        <div class="card-info-left">
+          <div class="card-number">Variation A</div>
+          <h2 class="card-title">Split-Screen & Horizontal Flow</h2>
+          <p class="card-description">50/50 split hero with an animated CSS security radar visualization (pulsing grid + rotating ring). Horizontally scrolling service cards with snap points. Zigzag alternating feature rows with massive decorative numbers. Vertical timeline for process steps. Accordion-style expandable compliance rows.</p>
+          <div class="layout-chips">
+            <span class="layout-chip">50/50 Split Hero</span>
+            <span class="layout-chip">CSS Radar Animation</span>
+            <span class="layout-chip">Horizontal Scroll Cards</span>
+            <span class="layout-chip">Zigzag Alternating Rows</span>
+            <span class="layout-chip">Vertical Timeline</span>
+            <span class="layout-chip">Accordion Compliance</span>
+          </div>
+        </div>
+        <div class="card-info-right">
+          <div class="tag-row">
+            <span class="tag">Split Layout</span>
+            <span class="tag">Horizontal Scroll</span>
+          </div>
+          <a href="mockup-4a/index.html" target="_blank" rel="noopener" class="view-btn">
+            View Variation
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Variation B: Full-Width Immersive Cards -->
+    <article class="mockup-card">
+      <div class="preview-container">
+        <iframe src="mockup-4b/index.html" loading="lazy" sandbox="allow-same-origin" title="Variation B Preview"></iframe>
+        <a href="mockup-4b/index.html" class="preview-overlay" target="_blank" rel="noopener">
+          <span class="open-label">Open Full Preview &rarr;</span>
+        </a>
+      </div>
+      <div class="card-info">
+        <div class="card-info-left">
+          <div class="card-number">Variation B</div>
+          <h2 class="card-title">Full-Width Immersive Cards</h2>
+          <p class="card-description">Centered vertical header that collapses on scroll. Full-viewport hero with inline stat pills. Two large grouped service cards (Application Security / Infrastructure Security). Full-width compliance columns with gradient dividers. Stacked process cards with huge step numbers. CSS-only tabbed compliance interface. Wide-format contact form.</p>
+          <div class="layout-chips">
+            <span class="layout-chip">Centered Vertical Nav</span>
+            <span class="layout-chip">Full-Viewport Hero</span>
+            <span class="layout-chip">Grouped Service Cards</span>
+            <span class="layout-chip">Stacked Process Cards</span>
+            <span class="layout-chip">CSS-Only Tabs</span>
+            <span class="layout-chip">3-Column Form</span>
+          </div>
+        </div>
+        <div class="card-info-right">
+          <div class="tag-row">
+            <span class="tag">Full-Width Panels</span>
+            <span class="tag">Immersive</span>
+          </div>
+          <a href="mockup-4b/index.html" target="_blank" rel="noopener" class="view-btn">
+            View Variation
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Variation C: Asymmetric Dashboard Grid -->
+    <article class="mockup-card">
+      <div class="preview-container">
+        <iframe src="mockup-4c/index.html" loading="lazy" sandbox="allow-same-origin" title="Variation C Preview"></iframe>
+        <a href="mockup-4c/index.html" class="preview-overlay" target="_blank" rel="noopener">
+          <span class="open-label">Open Full Preview &rarr;</span>
+        </a>
+      </div>
+      <div class="card-info">
+        <div class="card-info-left">
+          <div class="card-number">Variation C</div>
+          <h2 class="card-title">Asymmetric Dashboard Grid</h2>
+          <p class="card-description">Fixed sidebar navigation on desktop (collapses to top bar on mobile). Masonry-style service grid with mixed card sizes. Hero with a live "status panel" showing system states. Cascading/waterfall feature items. Overlapping horizontal process cards. Square compliance tiles with hover scale effect.</p>
+          <div class="layout-chips">
+            <span class="layout-chip">Sidebar Navigation</span>
+            <span class="layout-chip">Live Status Panel</span>
+            <span class="layout-chip">Masonry Service Grid</span>
+            <span class="layout-chip">Cascading Features</span>
+            <span class="layout-chip">Overlapping Process Cards</span>
+            <span class="layout-chip">Square Compliance Tiles</span>
+          </div>
+        </div>
+        <div class="card-info-right">
+          <div class="tag-row">
+            <span class="tag">Sidebar Nav</span>
+            <span class="tag">Asymmetric Grid</span>
+          </div>
+          <a href="mockup-4c/index.html" target="_blank" rel="noopener" class="view-btn">
+            View Variation
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Variation D: Narrative Single-Column -->
+    <article class="mockup-card">
+      <div class="preview-container">
+        <iframe src="mockup-4d/index.html" loading="lazy" sandbox="allow-same-origin" title="Variation D Preview"></iframe>
+        <a href="mockup-4d/index.html" class="preview-overlay" target="_blank" rel="noopener">
+          <span class="open-label">Open Full Preview &rarr;</span>
+        </a>
+      </div>
+      <div class="card-info">
+        <div class="card-info-left">
+          <div class="card-number">Variation D</div>
+          <h2 class="card-title">Narrative Single-Column</h2>
+          <p class="card-description">Everything in a single 720px column. Ultra-minimal header. Multi-line hero with per-line typographic styling. Services as a clean list with hairline dividers. Long-form editorial story section with pull-quotes. Numbered process steps with gradient rules. Text-only compliance table. Massive "Let's talk." CTA. Bottom-border-only form inputs.</p>
+          <div class="layout-chips">
+            <span class="layout-chip">720px Single Column</span>
+            <span class="layout-chip">Typographic Hero</span>
+            <span class="layout-chip">List-Style Services</span>
+            <span class="layout-chip">Editorial Storytelling</span>
+            <span class="layout-chip">Minimal Form Inputs</span>
+            <span class="layout-chip">Maximum Whitespace</span>
+          </div>
+        </div>
+        <div class="card-info-right">
+          <div class="tag-row">
+            <span class="tag">Single Column</span>
+            <span class="tag">Editorial</span>
+          </div>
+          <a href="mockup-4d/index.html" target="_blank" rel="noopener" class="view-btn">
+            View Variation
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg>
+          </a>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <footer class="footer">
+    Barracoder Security &mdash; Layout Gallery &middot; 2026
+  </footer>
+
+</body>
+</html>

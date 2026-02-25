@@ -1,0 +1,2276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barracoder Security — Penetration Testing That Drives Compliance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* =========================================
+       RESET & BASE
+       ========================================= */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0B0D17;
+      color: #FFFFFF;
+      line-height: 1.7;
+      overflow-x: hidden;
+      font-weight: 400;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      transition: color 0.3s ease;
+    }
+
+    img { max-width: 100%; display: block; }
+    ul { list-style: none; }
+    button, input, textarea, select {
+      font-family: inherit;
+      border: none;
+      outline: none;
+      background: none;
+    }
+
+    /* =========================================
+       UTILITIES
+       ========================================= */
+    .gradient-text {
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .btn-gradient {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 24px rgba(59, 130, 246, 0.3);
+      border: none;
+    }
+
+    .btn-gradient:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.45);
+    }
+
+    .btn-glass {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-glass:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #94A3B8;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 16px;
+    }
+
+    .section-heading {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-sub {
+      color: #94A3B8;
+      font-size: 1.05rem;
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      transition: all 0.35s ease;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255,255,255,0.16);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    }
+
+    /* =========================================
+       BACKGROUND GRADIENT MESH
+       ========================================= */
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(160px);
+      opacity: 0.15;
+    }
+
+    .bg-orb--1 {
+      width: 700px;
+      height: 700px;
+      background: #3B82F6;
+      top: -15%;
+      right: -10%;
+      animation: orbFloat1 25s ease-in-out infinite;
+    }
+
+    .bg-orb--2 {
+      width: 600px;
+      height: 600px;
+      background: #7C3AED;
+      bottom: -10%;
+      left: -10%;
+      animation: orbFloat2 30s ease-in-out infinite;
+    }
+
+    .bg-orb--3 {
+      width: 500px;
+      height: 500px;
+      background: #3B82F6;
+      top: 40%;
+      left: 30%;
+      opacity: 0.08;
+      animation: orbFloat3 22s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-60px, 40px) scale(1.05); }
+      66% { transform: translate(30px, -30px) scale(0.95); }
+    }
+
+    @keyframes orbFloat2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(50px, -50px) scale(1.08); }
+      66% { transform: translate(-40px, 30px) scale(0.96); }
+    }
+
+    @keyframes orbFloat3 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(60px, -40px); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* =========================================
+       SIDEBAR NAV (Desktop)
+       ========================================= */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 220px;
+      height: 100vh;
+      background: rgba(11, 13, 23, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-right: 1px solid rgba(255,255,255,0.06);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      padding: 32px 0;
+      overflow-y: auto;
+    }
+
+    .sidebar__logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      padding: 0 24px;
+      margin-bottom: 48px;
+    }
+
+    .sidebar__logo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .sidebar__nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .sidebar__link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: #64748B;
+      transition: all 0.3s ease;
+      position: relative;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar__link:hover {
+      color: #CBD5E1;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .sidebar__link.active {
+      color: #fff;
+      border-left: 3px solid transparent;
+      border-image: linear-gradient(180deg, #3B82F6, #7C3AED) 1;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .sidebar__link i {
+      width: 20px;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .sidebar__cta-wrap {
+      padding: 24px;
+      margin-top: auto;
+    }
+
+    .sidebar__cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+      border: none;
+    }
+
+    .sidebar__cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Main content offset */
+    .main-content {
+      margin-left: 220px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* =========================================
+       MOBILE TOP NAV
+       ========================================= */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      height: 64px;
+      background: rgba(11, 13, 23, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 0 20px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mobile-header__logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .mobile-header__logo-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: #fff;
+    }
+
+    .mobile-toggle {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      background: none;
+      border: none;
+    }
+
+    .mobile-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(11, 13, 23, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1001;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .mobile-nav.active {
+      display: flex;
+    }
+
+    .mobile-nav a {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #94A3B8;
+      transition: color 0.3s ease;
+    }
+
+    .mobile-nav a:hover { color: #fff; }
+
+    .mobile-nav__close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      font-size: 1.6rem;
+      color: #94A3B8;
+      cursor: pointer;
+      transition: color 0.3s ease;
+      background: none;
+      border: none;
+    }
+
+    .mobile-nav__close:hover { color: #fff; }
+
+    /* =========================================
+       HERO — Asymmetric Two-Column
+       ========================================= */
+    .hero {
+      padding: 100px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero__inner {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .hero__content {
+      animation: fadeInUp 0.7s ease forwards;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #94A3B8;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 28px;
+    }
+
+    .hero__badge i {
+      color: #3B82F6;
+      font-size: 0.75rem;
+    }
+
+    .hero__heading {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      margin-bottom: 20px;
+    }
+
+    .hero__sub {
+      font-size: clamp(1rem, 1.3vw, 1.1rem);
+      color: #94A3B8;
+      max-width: 520px;
+      line-height: 1.75;
+      margin-bottom: 36px;
+    }
+
+    .hero__buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Status Panel */
+    .status-panel {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 28px 24px;
+      animation: fadeInUp 0.7s 0.2s ease forwards;
+      opacity: 0;
+    }
+
+    .status-panel__header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .status-panel__dot-live {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #10B981;
+      box-shadow: 0 0 12px rgba(16,185,129,0.5);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .status-panel__label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #10B981;
+      letter-spacing: 0.02em;
+    }
+
+    .status-panel__time {
+      font-size: 0.7rem;
+      color: #475569;
+      margin-left: auto;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .status-row:last-child { border-bottom: none; }
+
+    .status-row__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-row__dot--green {
+      background: #10B981;
+      box-shadow: 0 0 8px rgba(16,185,129,0.4);
+    }
+
+    .status-row__dot--blue {
+      background: #3B82F6;
+      box-shadow: 0 0 8px rgba(59,130,246,0.4);
+    }
+
+    .status-row__dot--amber {
+      background: #F59E0B;
+      box-shadow: 0 0 8px rgba(245,158,11,0.4);
+    }
+
+    .status-row__name {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #CBD5E1;
+      flex: 1;
+    }
+
+    .status-row__state {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .status-row__state--online {
+      background: rgba(16,185,129,0.12);
+      color: #10B981;
+    }
+
+    .status-row__state--running {
+      background: rgba(59,130,246,0.12);
+      color: #3B82F6;
+    }
+
+    .status-row__state--queued {
+      background: rgba(245,158,11,0.12);
+      color: #F59E0B;
+    }
+
+    .status-row__state--complete {
+      background: rgba(16,185,129,0.12);
+      color: #10B981;
+    }
+
+    /* Hero orbs */
+    .hero__orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+
+    .hero__orb--1 {
+      width: 500px;
+      height: 500px;
+      background: #3B82F6;
+      opacity: 0.12;
+      top: -10%;
+      right: -5%;
+      animation: orbFloat1 20s ease-in-out infinite;
+    }
+
+    .hero__orb--2 {
+      width: 450px;
+      height: 450px;
+      background: #7C3AED;
+      opacity: 0.1;
+      bottom: -15%;
+      left: -5%;
+      animation: orbFloat2 24s ease-in-out infinite;
+    }
+
+    /* =========================================
+       SERVICES — Masonry Grid
+       ========================================= */
+    .services {
+      padding: 80px 0 100px;
+    }
+
+    .services__header {
+      margin-bottom: 48px;
+    }
+
+    .services__heading-underline {
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      border-radius: 2px;
+      margin-top: 16px;
+    }
+
+    .services__masonry {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: minmax(200px, auto);
+      gap: 20px;
+    }
+
+    /* Card spanning variants */
+    .service-card--wide {
+      grid-column: span 2;
+    }
+
+    .service-card--tall {
+      grid-row: span 2;
+    }
+
+    .service-card {
+      padding: 32px 28px;
+      cursor: default;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .service-card--horizontal {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 24px;
+    }
+
+    .service-card--horizontal .service-card__icon {
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .service-card__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(124,58,237,0.2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #3B82F6;
+      margin-bottom: 20px;
+    }
+
+    .service-card__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .service-card__desc {
+      color: #94A3B8;
+      font-size: 0.9rem;
+      line-height: 1.65;
+      margin-bottom: 16px;
+      flex: 1;
+    }
+
+    .service-card__link {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #3B82F6;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: gap 0.3s ease;
+    }
+
+    .service-card:hover .service-card__link {
+      gap: 10px;
+    }
+
+    .service-card:hover .service-card__icon {
+      background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(124,58,237,0.3));
+    }
+
+    /* =========================================
+       STATS / TRUST — Asymmetric Row
+       ========================================= */
+    .stats {
+      padding: 60px 0 80px;
+    }
+
+    .stats__row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .stats__primary {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 48px 40px;
+    }
+
+    .stats__primary-number {
+      font-size: clamp(3rem, 6vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .stats__primary-label {
+      font-size: 1.1rem;
+      color: #94A3B8;
+      font-weight: 500;
+    }
+
+    .stats__stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .stats__secondary {
+      padding: 32px 36px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .stats__secondary-number {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .stats__secondary-label {
+      font-size: 0.95rem;
+      color: #94A3B8;
+      font-weight: 500;
+    }
+
+    /* =========================================
+       FEATURES — Offset Two-Column
+       ========================================= */
+    .features {
+      padding: 80px 0 100px;
+    }
+
+    .features__inner {
+      display: grid;
+      grid-template-columns: 55% 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .features__list {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      margin-top: 36px;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-item:nth-child(1) { margin-left: 0; }
+    .feature-item:nth-child(2) { margin-left: 20px; }
+    .feature-item:nth-child(3) { margin-left: 40px; }
+
+    .feature-item__icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3B82F6;
+      font-size: 1rem;
+      margin-top: 2px;
+    }
+
+    .feature-item__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .feature-item__desc {
+      color: #94A3B8;
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+
+    /* Dashboard Mockup */
+    .dashboard-mock {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-mock::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 20px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(124,58,237,0.3), rgba(59,130,246,0.1));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .dashboard__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .dashboard__title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #94A3B8;
+    }
+
+    .dashboard__dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dashboard__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .dashboard__dot--red { background: #EF4444; }
+    .dashboard__dot--yellow { background: #F59E0B; }
+    .dashboard__dot--green { background: #10B981; }
+
+    .dashboard__stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-box__value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-box__value--critical { color: #EF4444; }
+    .stat-box__value--high { color: #F59E0B; }
+    .stat-box__value--medium { color: #3B82F6; }
+
+    .stat-box__label {
+      font-size: 0.68rem;
+      color: #64748B;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .dashboard__chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 100px;
+      padding: 16px 0 0;
+    }
+
+    .chart-bar {
+      flex: 1;
+      border-radius: 6px 6px 2px 2px;
+      min-height: 8px;
+    }
+
+    .chart-bar--1 { height: 45%; background: linear-gradient(180deg, #3B82F6, #2563EB); }
+    .chart-bar--2 { height: 72%; background: linear-gradient(180deg, #7C3AED, #6D28D9); }
+    .chart-bar--3 { height: 35%; background: linear-gradient(180deg, #3B82F6, #2563EB); }
+    .chart-bar--4 { height: 88%; background: linear-gradient(180deg, #EF4444, #DC2626); }
+    .chart-bar--5 { height: 55%; background: linear-gradient(180deg, #F59E0B, #D97706); }
+    .chart-bar--6 { height: 40%; background: linear-gradient(180deg, #3B82F6, #2563EB); }
+    .chart-bar--7 { height: 65%; background: linear-gradient(180deg, #7C3AED, #6D28D9); }
+    .chart-bar--8 { height: 28%; background: linear-gradient(180deg, #10B981, #059669); }
+
+    .dashboard__findings {
+      margin-top: 20px;
+    }
+
+    .finding-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .finding-row:last-child { border-bottom: none; }
+
+    .finding__severity {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .finding__severity--critical { background: #EF4444; box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+    .finding__severity--high { background: #F59E0B; box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+    .finding__severity--medium { background: #3B82F6; box-shadow: 0 0 8px rgba(59,130,246,0.3); }
+
+    .finding__name {
+      font-size: 0.78rem;
+      font-weight: 500;
+      flex: 1;
+    }
+
+    .finding__tag {
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .finding__tag--critical { background: rgba(239,68,68,0.15); color: #EF4444; }
+    .finding__tag--high { background: rgba(245,158,11,0.15); color: #F59E0B; }
+    .finding__tag--medium { background: rgba(59,130,246,0.15); color: #3B82F6; }
+
+    /* =========================================
+       PROCESS — Horizontal Overlapping Cards
+       ========================================= */
+    .process {
+      padding: 80px 0 100px;
+    }
+
+    .process__header {
+      margin-bottom: 56px;
+    }
+
+    .process__progress-bar {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .process__progress-fill {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #3B82F6, #7C3AED, #3B82F6);
+      border-radius: 2px;
+      background-size: 200% 100%;
+      animation: progressShimmer 4s ease-in-out infinite;
+    }
+
+    @keyframes progressShimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .process__cards {
+      display: flex;
+      gap: 0;
+      position: relative;
+    }
+
+    .process-card {
+      flex: 1;
+      min-width: 0;
+      padding: 32px 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .process-card:nth-child(2) { margin-left: -20px; z-index: 2; }
+    .process-card:nth-child(3) { margin-left: -20px; z-index: 3; }
+    .process-card:nth-child(4) { margin-left: -20px; z-index: 4; }
+
+    .process-card:hover { z-index: 10; transform: translateY(-4px); }
+
+    .process-card__number {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 16px rgba(59,130,246,0.25);
+    }
+
+    .process-card__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .process-card__desc {
+      font-size: 0.85rem;
+      color: #94A3B8;
+      line-height: 1.65;
+    }
+
+    /* =========================================
+       COMPLIANCE — Square Tiles Grid
+       ========================================= */
+    .compliance {
+      padding: 80px 0 100px;
+    }
+
+    .compliance__header {
+      margin-bottom: 48px;
+    }
+
+    .compliance__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .compliance-tile {
+      aspect-ratio: 1;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: default;
+      transition: all 0.35s ease;
+    }
+
+    .compliance-tile:hover {
+      transform: scale(1.03);
+      border-color: rgba(255,255,255,0.16);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    }
+
+    .compliance-tile__icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+    }
+
+    .compliance-tile__icon--blue {
+      background: rgba(59,130,246,0.15);
+      color: #3B82F6;
+    }
+
+    .compliance-tile__icon--purple {
+      background: rgba(124,58,237,0.15);
+      color: #7C3AED;
+    }
+
+    .compliance-tile__icon--green {
+      background: rgba(16,185,129,0.15);
+      color: #10B981;
+    }
+
+    .compliance-tile__icon--amber {
+      background: rgba(245,158,11,0.15);
+      color: #F59E0B;
+    }
+
+    .compliance-tile__icon--red {
+      background: rgba(239,68,68,0.15);
+      color: #EF4444;
+    }
+
+    .compliance-tile__icon--gradient {
+      background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(124,58,237,0.15));
+      color: #94A3B8;
+    }
+
+    .compliance-tile__name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .compliance-tile__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .control-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #CBD5E1;
+    }
+
+    /* =========================================
+       CTA — Asymmetric Split
+       ========================================= */
+    .cta {
+      padding: 100px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta__inner {
+      display: grid;
+      grid-template-columns: 40% 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .cta__decorative {
+      position: relative;
+      height: 280px;
+      display: flex;
+      align-items: center;
+    }
+
+    .cta__circle {
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      opacity: 0.15;
+      filter: blur(2px);
+      position: absolute;
+      left: -100px;
+    }
+
+    .cta__circle::after {
+      content: '';
+      position: absolute;
+      inset: 20px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .cta__content {
+      text-align: left;
+    }
+
+    .cta__heading {
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+
+    .cta__note {
+      color: #64748B;
+      font-size: 0.85rem;
+      margin-top: 20px;
+    }
+
+    /* =========================================
+       CONTACT — Side-by-Side
+       ========================================= */
+    .contact {
+      padding: 80px 0 100px;
+    }
+
+    .contact__header {
+      margin-bottom: 48px;
+    }
+
+    .contact__split {
+      display: grid;
+      grid-template-columns: 40% 1fr;
+      gap: 0;
+    }
+
+    .contact__info {
+      padding: 40px 36px;
+      border-radius: 16px 0 0 16px;
+      border-right: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .contact__info-heading {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .contact__info-sub {
+      font-size: 0.88rem;
+      color: #94A3B8;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .contact__info-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .contact__info-row:last-child { border-bottom: none; }
+
+    .contact__info-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3B82F6;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .contact__info-label {
+      font-size: 0.78rem;
+      color: #64748B;
+      margin-bottom: 2px;
+    }
+
+    .contact__info-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #CBD5E1;
+    }
+
+    .contact__form-panel {
+      padding: 40px 36px;
+      border-radius: 0 16px 16px 0;
+      border-left: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #CBD5E1;
+      margin-bottom: 8px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.88rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: #475569;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: rgba(59,130,246,0.5);
+      background: rgba(255,255,255,0.07);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+
+    .form-select option {
+      background: #10132A;
+      color: #fff;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-submit {
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    /* =========================================
+       FOOTER — Compact Two-Column
+       ========================================= */
+    .footer {
+      padding: 32px 0 28px;
+      border-top: 1px solid transparent;
+      background-image: linear-gradient(#0B0D17, #0B0D17), linear-gradient(90deg, #3B82F6, #7C3AED, #3B82F6);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+
+    .footer__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .footer__left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .footer__logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .footer__logo-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #fff;
+    }
+
+    .footer__copy {
+      color: #475569;
+      font-size: 0.8rem;
+    }
+
+    .footer__links {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .footer__link {
+      color: #64748B;
+      font-size: 0.82rem;
+      padding: 4px 12px;
+      transition: color 0.3s ease;
+    }
+
+    .footer__link:hover { color: #fff; }
+
+    .footer__link + .footer__link::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #334155;
+      margin-right: 12px;
+      vertical-align: middle;
+    }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @media (max-width: 1024px) {
+      .sidebar {
+        display: none;
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding-top: 64px;
+      }
+
+      .hero {
+        padding-top: 60px;
+      }
+
+      .hero__inner {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+
+      .status-panel {
+        max-width: 400px;
+      }
+
+      .services__masonry {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: auto;
+      }
+
+      .service-card--wide { grid-column: span 2; }
+      .service-card--tall { grid-row: span 1; }
+
+      .features__inner {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .features__visual {
+        order: -1;
+        max-width: 520px;
+      }
+
+      .feature-item:nth-child(1) { margin-left: 0; }
+      .feature-item:nth-child(2) { margin-left: 0; }
+      .feature-item:nth-child(3) { margin-left: 0; }
+
+      .stats__row {
+        grid-template-columns: 1fr;
+      }
+
+      .process__cards {
+        flex-wrap: wrap;
+      }
+
+      .process-card {
+        flex: 1 1 calc(50% - 10px);
+        margin-left: 0 !important;
+      }
+
+      .process-card:nth-child(2),
+      .process-card:nth-child(3),
+      .process-card:nth-child(4) {
+        margin-left: 0;
+      }
+
+      .compliance__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .compliance-tile {
+        aspect-ratio: auto;
+        padding: 24px 20px;
+      }
+
+      .cta__inner {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .cta__decorative { display: none; }
+      .cta__content { text-align: center; }
+
+      .contact__split {
+        grid-template-columns: 1fr;
+      }
+
+      .contact__info {
+        border-radius: 16px 16px 0 0;
+        border-right: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .contact__form-panel {
+        border-radius: 0 0 16px 16px;
+        border-left: 1px solid rgba(255,255,255,0.08);
+        border-top: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 20px;
+      }
+
+      .hero__heading {
+        font-size: clamp(2rem, 8vw, 2.8rem);
+      }
+
+      .hero__buttons {
+        flex-direction: column;
+      }
+
+      .hero__buttons .btn-gradient,
+      .hero__buttons .btn-glass {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .services__masonry {
+        grid-template-columns: 1fr;
+      }
+
+      .service-card--wide { grid-column: span 1; }
+      .service-card--horizontal {
+        flex-direction: column;
+      }
+
+      .process__cards {
+        flex-direction: column;
+      }
+
+      .process-card {
+        flex: auto;
+      }
+
+      .compliance__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .contact__info,
+      .contact__form-panel {
+        padding: 28px 24px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .footer__inner {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .footer__left {
+        flex-direction: column;
+      }
+
+      .footer__links {
+        justify-content: center;
+      }
+    }
+
+    /* =========================================
+       SCROLLBAR STYLING
+       ========================================= */
+    .sidebar::-webkit-scrollbar {
+      width: 0;
+    }
+
+    /* Active nav highlight via JS */
+    .sidebar__link[data-active="true"] {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Gradient Mesh -->
+  <div class="bg-mesh" aria-hidden="true">
+    <div class="bg-orb bg-orb--1"></div>
+    <div class="bg-orb bg-orb--2"></div>
+    <div class="bg-orb bg-orb--3"></div>
+  </div>
+
+  <!-- ========== SIDEBAR NAV (Desktop) ========== -->
+  <aside class="sidebar" id="sidebar">
+    <a href="#" class="sidebar__logo">
+      <span class="sidebar__logo-icon"><i class="fa-solid fa-lock"></i></span>
+      <span class="gradient-text">Barracoder</span>
+    </a>
+
+    <nav class="sidebar__nav">
+      <a href="#services" class="sidebar__link active" data-section="services">
+        <i class="fa-solid fa-crosshairs"></i>
+        Services
+      </a>
+      <a href="#features" class="sidebar__link" data-section="features">
+        <i class="fa-solid fa-sparkles"></i>
+        Features
+      </a>
+      <a href="#process" class="sidebar__link" data-section="process">
+        <i class="fa-solid fa-route"></i>
+        Process
+      </a>
+      <a href="#compliance" class="sidebar__link" data-section="compliance">
+        <i class="fa-solid fa-scale-balanced"></i>
+        Compliance
+      </a>
+      <a href="#contact" class="sidebar__link" data-section="contact">
+        <i class="fa-solid fa-envelope"></i>
+        Contact
+      </a>
+    </nav>
+
+    <div class="sidebar__cta-wrap">
+      <a href="#contact" class="sidebar__cta">
+        Start Assessment
+        <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+  </aside>
+
+  <!-- ========== MOBILE HEADER ========== -->
+  <header class="mobile-header">
+    <a href="#" class="mobile-header__logo">
+      <span class="mobile-header__logo-icon"><i class="fa-solid fa-lock"></i></span>
+      <span class="gradient-text">Barracoder</span>
+    </a>
+    <button class="mobile-toggle" onclick="document.querySelector('.mobile-nav').classList.add('active')" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Mobile Nav Overlay -->
+  <div class="mobile-nav">
+    <button class="mobile-nav__close" onclick="document.querySelector('.mobile-nav').classList.remove('active')" aria-label="Close menu">&times;</button>
+    <a href="#services" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Services</a>
+    <a href="#features" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Features</a>
+    <a href="#process" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Process</a>
+    <a href="#compliance" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Compliance</a>
+    <a href="#contact" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Contact</a>
+    <a href="#contact" class="btn-gradient" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Start Assessment</a>
+  </div>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <div class="main-content">
+
+    <!-- ========== HERO ========== -->
+    <section class="hero">
+      <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
+      <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
+      <div class="container">
+        <div class="hero__inner">
+          <div class="hero__content">
+            <div class="hero__badge">
+              <i class="fa-solid fa-shield-halved"></i>
+              Trusted by 500+ organizations
+            </div>
+            <h1 class="hero__heading">
+              Penetration Testing<br>That <span class="gradient-text">Drives Compliance</span>
+            </h1>
+            <p class="hero__sub">
+              Modern security assessments built for organizations that demand rigor, transparency, and actionable results. Expert-led testing aligned to the frameworks that matter.
+            </p>
+            <div class="hero__buttons">
+              <a href="#contact" class="btn-gradient">
+                Get Started
+                <i class="fa-solid fa-arrow-right"></i>
+              </a>
+              <a href="#process" class="btn-glass">
+                <i class="fa-solid fa-play"></i>
+                Watch Demo
+              </a>
+            </div>
+          </div>
+
+          <!-- Status Panel -->
+          <div class="status-panel">
+            <div class="status-panel__header">
+              <div class="status-panel__dot-live"></div>
+              <span class="status-panel__label">Systems Active</span>
+              <span class="status-panel__time">Live</span>
+            </div>
+            <div class="status-row">
+              <span class="status-row__dot status-row__dot--green"></span>
+              <span class="status-row__name">Web App Scanner</span>
+              <span class="status-row__state status-row__state--online">Online</span>
+            </div>
+            <div class="status-row">
+              <span class="status-row__dot status-row__dot--green"></span>
+              <span class="status-row__name">API Monitor</span>
+              <span class="status-row__state status-row__state--online">Online</span>
+            </div>
+            <div class="status-row">
+              <span class="status-row__dot status-row__dot--blue"></span>
+              <span class="status-row__name">Cloud Audit</span>
+              <span class="status-row__state status-row__state--running">Running</span>
+            </div>
+            <div class="status-row">
+              <span class="status-row__dot status-row__dot--amber"></span>
+              <span class="status-row__name">M365 Check</span>
+              <span class="status-row__state status-row__state--queued">Queued</span>
+            </div>
+            <div class="status-row">
+              <span class="status-row__dot status-row__dot--green"></span>
+              <span class="status-row__name">Code Review</span>
+              <span class="status-row__state status-row__state--complete">Complete</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SERVICES — Masonry ========== -->
+    <section class="services" id="services">
+      <div class="container">
+        <div class="services__header">
+          <span class="section-label"><i class="fa-solid fa-crosshairs"></i> Services</span>
+          <h2 class="section-heading">What We Test</h2>
+          <p class="section-sub">Comprehensive offensive security engagements across your entire attack surface.</p>
+          <div class="services__heading-underline"></div>
+        </div>
+
+        <div class="services__masonry">
+          <!-- Card 1: Wide (2 col, 1 row) — horizontal layout -->
+          <div class="glass-card service-card service-card--wide service-card--horizontal">
+            <div class="service-card__icon"><i class="fa-solid fa-globe"></i></div>
+            <div>
+              <h3 class="service-card__title">Web App Pentest</h3>
+              <p class="service-card__desc">Thorough testing of web applications against OWASP Top 10 and beyond. We uncover injection flaws, authentication bypasses, and business logic vulnerabilities.</p>
+              <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <!-- Card 2: Standard (1 col, 1 row) -->
+          <div class="glass-card service-card">
+            <div class="service-card__icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+            <h3 class="service-card__title">Mobile App Pentest</h3>
+            <p class="service-card__desc">iOS and Android security assessments covering insecure data storage, certificate pinning, API communication, and reverse engineering resistance.</p>
+            <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+
+          <!-- Card 3: Standard (1 col, 1 row) -->
+          <div class="glass-card service-card">
+            <div class="service-card__icon"><i class="fa-solid fa-plug"></i></div>
+            <h3 class="service-card__title">API Pentest</h3>
+            <p class="service-card__desc">REST, GraphQL, and gRPC API security testing. We probe authentication, authorization, rate limiting, and data exposure across your endpoints.</p>
+            <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+
+          <!-- Card 4: Tall (1 col, 2 rows) -->
+          <div class="glass-card service-card service-card--tall">
+            <div class="service-card__icon"><i class="fa-solid fa-cloud"></i></div>
+            <h3 class="service-card__title">Cloud Pentest</h3>
+            <p class="service-card__desc">AWS, Azure, and GCP infrastructure assessments. Misconfigurations, IAM weaknesses, storage exposure, and privilege escalation paths. We evaluate your entire cloud posture including serverless functions, container orchestration, and network segmentation across multi-cloud environments.</p>
+            <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+
+          <!-- Card 5: Wide (2 col, 1 row) — horizontal layout -->
+          <div class="glass-card service-card service-card--wide service-card--horizontal">
+            <div class="service-card__icon"><i class="fa-brands fa-microsoft"></i></div>
+            <div>
+              <h3 class="service-card__title">M365 Pentest</h3>
+              <p class="service-card__desc">Microsoft 365 and Azure AD security assessments. We test tenant configurations, mailbox delegation, Teams security, and conditional access policies.</p>
+              <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <!-- Card 6: Standard (1 col, 1 row) -->
+          <div class="glass-card service-card">
+            <div class="service-card__icon"><i class="fa-solid fa-code"></i></div>
+            <h3 class="service-card__title">Source Code Review</h3>
+            <p class="service-card__desc">Manual and tool-assisted source code analysis identifying security flaws before deployment. We review architecture patterns and cryptographic implementations.</p>
+            <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== STATS / TRUST — Asymmetric ========== -->
+    <section class="stats">
+      <div class="container">
+        <div class="stats__row">
+          <div class="glass-card stats__primary">
+            <div class="stats__primary-number gradient-text">500+</div>
+            <div class="stats__primary-label">Security Assessments Completed</div>
+          </div>
+          <div class="stats__stack">
+            <div class="glass-card stats__secondary">
+              <div class="stats__secondary-number gradient-text">6</div>
+              <div class="stats__secondary-label">Core Service Lines</div>
+            </div>
+            <div class="glass-card stats__secondary">
+              <div class="stats__secondary-number gradient-text">5</div>
+              <div class="stats__secondary-label">Compliance Frameworks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FEATURES — Offset Two-Column ========== -->
+    <section class="features" id="features">
+      <div class="container">
+        <div class="features__inner">
+          <!-- Dashboard Mockup -->
+          <div class="features__visual">
+            <div class="dashboard-mock">
+              <div class="dashboard__header">
+                <span class="dashboard__title">Assessment Dashboard</span>
+                <div class="dashboard__dots">
+                  <span class="dashboard__dot dashboard__dot--red"></span>
+                  <span class="dashboard__dot dashboard__dot--yellow"></span>
+                  <span class="dashboard__dot dashboard__dot--green"></span>
+                </div>
+              </div>
+
+              <div class="dashboard__stats">
+                <div class="stat-box">
+                  <div class="stat-box__value stat-box__value--critical">3</div>
+                  <div class="stat-box__label">Critical</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-box__value stat-box__value--high">8</div>
+                  <div class="stat-box__label">High</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-box__value stat-box__value--medium">14</div>
+                  <div class="stat-box__label">Medium</div>
+                </div>
+              </div>
+
+              <div class="dashboard__chart">
+                <div class="chart-bar chart-bar--1"></div>
+                <div class="chart-bar chart-bar--2"></div>
+                <div class="chart-bar chart-bar--3"></div>
+                <div class="chart-bar chart-bar--4"></div>
+                <div class="chart-bar chart-bar--5"></div>
+                <div class="chart-bar chart-bar--6"></div>
+                <div class="chart-bar chart-bar--7"></div>
+                <div class="chart-bar chart-bar--8"></div>
+              </div>
+
+              <div class="dashboard__findings">
+                <div class="finding-row">
+                  <span class="finding__severity finding__severity--critical"></span>
+                  <span class="finding__name">SQL Injection — User Search</span>
+                  <span class="finding__tag finding__tag--critical">Critical</span>
+                </div>
+                <div class="finding-row">
+                  <span class="finding__severity finding__severity--high"></span>
+                  <span class="finding__name">Broken Access Control — Admin API</span>
+                  <span class="finding__tag finding__tag--high">High</span>
+                </div>
+                <div class="finding-row">
+                  <span class="finding__severity finding__severity--medium"></span>
+                  <span class="finding__name">Missing Rate Limiting — Auth</span>
+                  <span class="finding__tag finding__tag--medium">Medium</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature Items (cascading) -->
+          <div class="features__content">
+            <span class="section-label"><i class="fa-solid fa-sparkles"></i> Why Barracoder</span>
+            <h2 class="section-heading">Security Meets<br><span class="gradient-text">Simplicity</span></h2>
+            <p class="section-sub">We combine deep offensive expertise with a modern delivery experience. No bloated PDFs, no vague findings — just clear, prioritized, actionable results.</p>
+
+            <div class="features__list">
+              <div class="feature-item">
+                <div class="feature-item__icon"><i class="fa-solid fa-user-shield"></i></div>
+                <div>
+                  <h3 class="feature-item__title">Expert-Led Testing</h3>
+                  <p class="feature-item__desc">Every engagement is conducted by seasoned penetration testers with deep specialization — not automated scanners repackaged as assessments.</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-item__icon"><i class="fa-solid fa-list-check"></i></div>
+                <div>
+                  <h3 class="feature-item__title">Compliance Mapped Results</h3>
+                  <p class="feature-item__desc">Findings are mapped directly to the compliance controls that matter to your auditors — PCI DSS, SOC 2, HIPAA, and more — out of the box.</p>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-item__icon"><i class="fa-solid fa-wrench"></i></div>
+                <div>
+                  <h3 class="feature-item__title">Actionable Remediation</h3>
+                  <p class="feature-item__desc">Every finding includes precise remediation guidance with code snippets, configuration examples, and verification steps your team can act on immediately.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PROCESS — Horizontal Overlapping ========== -->
+    <section class="process" id="process">
+      <div class="container">
+        <div class="process__header">
+          <span class="section-label"><i class="fa-solid fa-route"></i> Methodology</span>
+          <h2 class="section-heading">How It Works</h2>
+          <p class="section-sub">A structured, transparent engagement process from scoping to verified remediation.</p>
+        </div>
+
+        <div class="process__progress-bar">
+          <div class="process__progress-fill"></div>
+        </div>
+
+        <div class="process__cards">
+          <div class="glass-card process-card">
+            <div class="process-card__number">1</div>
+            <h3 class="process-card__title">Scope</h3>
+            <p class="process-card__desc">We define target assets, testing windows, compliance requirements, and rules of engagement collaboratively.</p>
+          </div>
+          <div class="glass-card process-card">
+            <div class="process-card__number">2</div>
+            <h3 class="process-card__title">Test</h3>
+            <p class="process-card__desc">Expert testers execute manual and tool-assisted testing, simulating real-world attacker techniques against your systems.</p>
+          </div>
+          <div class="glass-card process-card">
+            <div class="process-card__number">3</div>
+            <h3 class="process-card__title">Report</h3>
+            <p class="process-card__desc">You receive a detailed report with prioritized findings, evidence, compliance mapping, and precise remediation guidance.</p>
+          </div>
+          <div class="glass-card process-card">
+            <div class="process-card__number">4</div>
+            <h3 class="process-card__title">Remediate</h3>
+            <p class="process-card__desc">We verify your fixes with targeted retesting and provide an updated attestation letter for your auditors.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== COMPLIANCE — Square Tiles ========== -->
+    <section class="compliance" id="compliance">
+      <div class="container">
+        <div class="compliance__header">
+          <span class="section-label"><i class="fa-solid fa-scale-balanced"></i> Frameworks</span>
+          <h2 class="section-heading">Built for <span class="gradient-text">Compliance</span></h2>
+          <p class="section-sub">Every assessment maps findings to the controls your auditors care about.</p>
+        </div>
+
+        <div class="compliance__grid">
+          <!-- PCI DSS -->
+          <div class="glass-card compliance-tile">
+            <div class="compliance-tile__icon compliance-tile__icon--blue">
+              <i class="fa-solid fa-credit-card"></i>
+            </div>
+            <h3 class="compliance-tile__name">PCI DSS v4.0</h3>
+            <div class="compliance-tile__tags">
+              <span class="control-tag">Req 6.2</span>
+              <span class="control-tag">Req 11.3</span>
+              <span class="control-tag">ASV</span>
+            </div>
+          </div>
+
+          <!-- SOC 2 -->
+          <div class="glass-card compliance-tile">
+            <div class="compliance-tile__icon compliance-tile__icon--purple">
+              <i class="fa-solid fa-clipboard-check"></i>
+            </div>
+            <h3 class="compliance-tile__name">SOC 2</h3>
+            <div class="compliance-tile__tags">
+              <span class="control-tag">CC6.1</span>
+              <span class="control-tag">CC7.1</span>
+              <span class="control-tag">CC7.2</span>
+            </div>
+          </div>
+
+          <!-- HIPAA -->
+          <div class="glass-card compliance-tile">
+            <div class="compliance-tile__icon compliance-tile__icon--green">
+              <i class="fa-solid fa-heart-pulse"></i>
+            </div>
+            <h3 class="compliance-tile__name">HIPAA</h3>
+            <div class="compliance-tile__tags">
+              <span class="control-tag">§164.312(a)</span>
+              <span class="control-tag">§164.312(e)</span>
+            </div>
+          </div>
+
+          <!-- NIST -->
+          <div class="glass-card compliance-tile">
+            <div class="compliance-tile__icon compliance-tile__icon--amber">
+              <i class="fa-solid fa-building-columns"></i>
+            </div>
+            <h3 class="compliance-tile__name">NIST 800-53</h3>
+            <div class="compliance-tile__tags">
+              <span class="control-tag">CA-8</span>
+              <span class="control-tag">RA-5</span>
+              <span class="control-tag">SI-3</span>
+            </div>
+          </div>
+
+          <!-- ISO 27001 -->
+          <div class="glass-card compliance-tile">
+            <div class="compliance-tile__icon compliance-tile__icon--red">
+              <i class="fa-solid fa-certificate"></i>
+            </div>
+            <h3 class="compliance-tile__name">ISO 27001</h3>
+            <div class="compliance-tile__tags">
+              <span class="control-tag">A.12.6</span>
+              <span class="control-tag">A.14.2</span>
+              <span class="control-tag">A.18.2</span>
+            </div>
+          </div>
+
+          <!-- +Custom -->
+          <div class="glass-card compliance-tile">
+            <div class="compliance-tile__icon compliance-tile__icon--gradient">
+              <i class="fa-solid fa-plus"></i>
+            </div>
+            <h3 class="compliance-tile__name">+Custom</h3>
+            <div class="compliance-tile__tags">
+              <span class="control-tag">HITRUST</span>
+              <span class="control-tag">FedRAMP</span>
+              <span class="control-tag">CIS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CTA — Asymmetric Split ========== -->
+    <section class="cta">
+      <div class="container">
+        <div class="cta__inner">
+          <div class="cta__decorative">
+            <div class="cta__circle"></div>
+          </div>
+          <div class="cta__content">
+            <h2 class="cta__heading">Ready to <span class="gradient-text">Elevate</span> Your Security?</h2>
+            <p class="section-sub" style="margin-bottom: 32px;">
+              Talk to our team about a tailored penetration testing engagement built for your compliance requirements.
+            </p>
+            <a href="#contact" class="btn-gradient" style="font-size: 1rem; padding: 16px 40px;">
+              Schedule a Consultation
+              <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            <p class="cta__note">No commitment. Free consultation.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CONTACT — Side-by-Side ========== -->
+    <section class="contact" id="contact">
+      <div class="container">
+        <div class="contact__header">
+          <span class="section-label"><i class="fa-solid fa-envelope"></i> Get In Touch</span>
+          <h2 class="section-heading">Start Your Assessment</h2>
+          <p class="section-sub">Tell us about your environment and we'll scope a tailored engagement.</p>
+        </div>
+
+        <div class="contact__split">
+          <!-- Info Panel -->
+          <div class="glass-card contact__info">
+            <h3 class="contact__info-heading">Contact Information</h3>
+            <p class="contact__info-sub">Reach out through any of these channels and we'll get back to you within one business day.</p>
+
+            <div class="contact__info-row">
+              <div class="contact__info-icon"><i class="fa-solid fa-envelope"></i></div>
+              <div>
+                <div class="contact__info-label">Email</div>
+                <div class="contact__info-value">security@barracoder.io</div>
+              </div>
+            </div>
+            <div class="contact__info-row">
+              <div class="contact__info-icon"><i class="fa-solid fa-phone"></i></div>
+              <div>
+                <div class="contact__info-label">Schedule a Call</div>
+                <div class="contact__info-value">Book a 30-min consultation</div>
+              </div>
+            </div>
+            <div class="contact__info-row">
+              <div class="contact__info-icon"><i class="fa-solid fa-comments"></i></div>
+              <div>
+                <div class="contact__info-label">Live Chat</div>
+                <div class="contact__info-value">Available Mon-Fri, 9am-6pm ET</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Panel -->
+          <div class="glass-card contact__form-panel">
+            <form onsubmit="return false;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="name">Full Name</label>
+                  <input type="text" id="name" class="form-input" placeholder="Jane Smith">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="email">Work Email</label>
+                  <input type="email" id="email" class="form-input" placeholder="jane@company.com">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="company">Company</label>
+                <input type="text" id="company" class="form-input" placeholder="Acme Corp">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="service">Service Interest</label>
+                <select id="service" class="form-select">
+                  <option value="" disabled selected>Select a service</option>
+                  <option value="webapp">Web Application Pentest</option>
+                  <option value="mobile">Mobile Application Pentest</option>
+                  <option value="api">API Pentest</option>
+                  <option value="cloud">Cloud Infrastructure Pentest</option>
+                  <option value="m365">M365 / Azure AD Pentest</option>
+                  <option value="code">Source Code Review</option>
+                  <option value="multiple">Multiple Services</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="message">Message</label>
+                <textarea id="message" class="form-textarea" placeholder="Tell us about your environment, timeline, and compliance requirements..."></textarea>
+              </div>
+              <button type="submit" class="btn-gradient form-submit">
+                Send Request
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FOOTER — Compact Two-Column ========== -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer__inner">
+          <div class="footer__left">
+            <a href="#" class="footer__logo">
+              <span class="footer__logo-icon"><i class="fa-solid fa-lock"></i></span>
+              <span class="gradient-text">Barracoder</span>
+            </a>
+            <span class="footer__copy">&copy; 2026 Barracoder Security. All rights reserved.</span>
+          </div>
+          <div class="footer__links">
+            <a href="#services" class="footer__link">Services</a>
+            <a href="#features" class="footer__link">Why Us</a>
+            <a href="#process" class="footer__link">Process</a>
+            <a href="#compliance" class="footer__link">Compliance</a>
+            <a href="#contact" class="footer__link">Contact</a>
+            <a href="#" class="footer__link">Privacy</a>
+            <a href="#" class="footer__link">Terms</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </div><!-- /.main-content -->
+
+  <!-- ========== SIDEBAR ACTIVE STATE JS ========== -->
+  <script>
+    // Highlight active sidebar link on scroll
+    (function() {
+      const links = document.querySelectorAll('.sidebar__link[data-section]');
+      const sections = [];
+
+      links.forEach(function(link) {
+        const id = link.getAttribute('data-section');
+        const section = document.getElementById(id);
+        if (section) sections.push({ id: id, el: section, link: link });
+      });
+
+      function onScroll() {
+        const scrollY = window.scrollY + 200;
+        let active = sections[0];
+
+        sections.forEach(function(s) {
+          if (s.el.offsetTop <= scrollY) {
+            active = s;
+          }
+        });
+
+        links.forEach(function(link) { link.classList.remove('active'); });
+        if (active) active.link.classList.add('active');
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    })();
+  </script>
+
+</body>
+</html>

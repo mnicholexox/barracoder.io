@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barracoder Security — Penetration Testing That Drives Compliance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    /* =========================================
+       RESET & BASE
+       ========================================= */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0B0D17;
+      color: #FFFFFF;
+      line-height: 1.7;
+      overflow-x: hidden;
+      font-weight: 400;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      transition: color 0.3s ease;
+    }
+
+    img { max-width: 100%; display: block; }
+    ul { list-style: none; }
+    button, input, textarea, select {
+      font-family: inherit;
+      border: none;
+      outline: none;
+      background: none;
+    }
+
+    /* =========================================
+       UTILITIES
+       ========================================= */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .btn-gradient {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 4px 24px rgba(59, 130, 246, 0.3);
+      border: none;
+    }
+
+    .btn-gradient:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(59, 130, 246, 0.45);
+    }
+
+    .btn-glass {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-glass:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #94A3B8;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 16px;
+    }
+
+    .section-heading {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-sub {
+      color: #94A3B8;
+      font-size: 1.05rem;
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      transition: all 0.35s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.16);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    }
+
+    /* =========================================
+       BACKGROUND GRADIENT MESH
+       ========================================= */
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(160px);
+      opacity: 0.15;
+    }
+
+    .bg-orb--1 {
+      width: 700px;
+      height: 700px;
+      background: #3B82F6;
+      top: -15%;
+      right: -10%;
+      animation: orbFloat1 25s ease-in-out infinite;
+    }
+
+    .bg-orb--2 {
+      width: 600px;
+      height: 600px;
+      background: #7C3AED;
+      bottom: -10%;
+      left: -10%;
+      animation: orbFloat2 30s ease-in-out infinite;
+    }
+
+    .bg-orb--3 {
+      width: 500px;
+      height: 500px;
+      background: #3B82F6;
+      top: 40%;
+      left: 30%;
+      opacity: 0.08;
+      animation: orbFloat3 22s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-60px, 40px) scale(1.05); }
+      66% { transform: translate(30px, -30px) scale(0.95); }
+    }
+
+    @keyframes orbFloat2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(50px, -50px) scale(1.08); }
+      66% { transform: translate(-40px, 30px) scale(0.96); }
+    }
+
+    @keyframes orbFloat3 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(60px, -40px); }
+    }
+
+    /* =========================================
+       HEADER / NAV
+       ========================================= */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 0 24px;
+      transition: background 0.3s ease;
+    }
+
+    .header__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      background: rgba(11, 13, 23, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      margin-top: 12px;
+      padding: 0 28px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .logo__icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .nav__links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav__link {
+      color: #94A3B8;
+      font-size: 0.9rem;
+      font-weight: 500;
+      position: relative;
+      padding: 4px 0;
+    }
+
+    .nav__link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      border-radius: 1px;
+      transition: width 0.3s ease;
+    }
+
+    .nav__link:hover {
+      color: #fff;
+    }
+
+    .nav__link:hover::after {
+      width: 100%;
+    }
+
+    .nav__cta {
+      padding: 10px 22px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+    }
+
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .mobile-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(11, 13, 23, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+
+    .mobile-nav.active {
+      display: flex;
+    }
+
+    .mobile-nav a {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #94A3B8;
+      transition: color 0.3s ease;
+    }
+
+    .mobile-nav a:hover {
+      color: #fff;
+    }
+
+    .mobile-nav__close {
+      position: absolute;
+      top: 28px;
+      right: 32px;
+      font-size: 1.6rem;
+      color: #94A3B8;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .mobile-nav__close:hover { color: #fff; }
+
+    /* =========================================
+       HERO
+       ========================================= */
+    .hero {
+      position: relative;
+      z-index: 1;
+      padding: 180px 0 100px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #94A3B8;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 32px;
+      animation: fadeInUp 0.7s ease forwards;
+    }
+
+    .hero__badge i {
+      color: #3B82F6;
+      font-size: 0.75rem;
+    }
+
+    .hero__heading {
+      font-size: clamp(2.6rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      margin-bottom: 24px;
+      max-width: 820px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeInUp 0.7s 0.1s ease forwards;
+      opacity: 0;
+    }
+
+    .hero__sub {
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      color: #94A3B8;
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.75;
+      animation: fadeInUp 0.7s 0.2s ease forwards;
+      opacity: 0;
+    }
+
+    .hero__buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.7s 0.3s ease forwards;
+      opacity: 0;
+    }
+
+    .hero__orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+    }
+
+    .hero__orb--1 {
+      width: 500px;
+      height: 500px;
+      background: #3B82F6;
+      opacity: 0.12;
+      top: -10%;
+      right: -5%;
+      animation: orbFloat1 20s ease-in-out infinite;
+    }
+
+    .hero__orb--2 {
+      width: 450px;
+      height: 450px;
+      background: #7C3AED;
+      opacity: 0.1;
+      bottom: -15%;
+      left: -5%;
+      animation: orbFloat2 24s ease-in-out infinite;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================
+       TRUST / LOGO BAR
+       ========================================= */
+    .trust {
+      position: relative;
+      z-index: 1;
+      padding: 60px 0 80px;
+      text-align: center;
+    }
+
+    .trust__label {
+      color: #94A3B8;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+
+    .trust__pills {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .trust__pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 22px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 100px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #CBD5E1;
+      animation: pillFloat 4s ease-in-out infinite;
+    }
+
+    .trust__pill:nth-child(1) { animation-delay: 0s; }
+    .trust__pill:nth-child(2) { animation-delay: 0.5s; }
+    .trust__pill:nth-child(3) { animation-delay: 1s; }
+    .trust__pill:nth-child(4) { animation-delay: 1.5s; }
+    .trust__pill:nth-child(5) { animation-delay: 2s; }
+
+    .trust__pill i {
+      font-size: 0.9rem;
+    }
+
+    .pill-icon--pci { color: #3B82F6; }
+    .pill-icon--soc { color: #7C3AED; }
+    .pill-icon--hipaa { color: #10B981; }
+    .pill-icon--nist { color: #F59E0B; }
+    .pill-icon--iso { color: #EF4444; }
+
+    @keyframes pillFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* =========================================
+       SERVICES
+       ========================================= */
+    .services {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0 100px;
+    }
+
+    .services__header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .services__heading-underline {
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      border-radius: 2px;
+      margin: 16px auto 0;
+    }
+
+    .services__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .service-card {
+      padding: 32px 28px;
+      cursor: default;
+    }
+
+    .service-card__icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(124,58,237,0.2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #3B82F6;
+      margin-bottom: 20px;
+    }
+
+    .service-card__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .service-card__desc {
+      color: #94A3B8;
+      font-size: 0.9rem;
+      line-height: 1.65;
+      margin-bottom: 16px;
+    }
+
+    .service-card__link {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #3B82F6;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: gap 0.3s ease;
+    }
+
+    .service-card:hover .service-card__link {
+      gap: 10px;
+    }
+
+    .service-card:hover .service-card__icon {
+      background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(124,58,237,0.3));
+    }
+
+    /* =========================================
+       FEATURES / WHY
+       ========================================= */
+    .features {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0 100px;
+    }
+
+    .features__inner {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .features__list {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      margin-top: 36px;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 20px;
+    }
+
+    .feature-item__icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3B82F6;
+      font-size: 1rem;
+      margin-top: 2px;
+    }
+
+    .feature-item__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .feature-item__desc {
+      color: #94A3B8;
+      font-size: 0.9rem;
+      line-height: 1.65;
+    }
+
+    /* Dashboard Mockup */
+    .dashboard-mock {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-mock::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 20px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(124,58,237,0.3), rgba(59,130,246,0.1));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .dashboard__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .dashboard__title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #94A3B8;
+    }
+
+    .dashboard__dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dashboard__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .dashboard__dot--red { background: #EF4444; }
+    .dashboard__dot--yellow { background: #F59E0B; }
+    .dashboard__dot--green { background: #10B981; }
+
+    .dashboard__stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-box {
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-box__value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-box__value--critical { color: #EF4444; }
+    .stat-box__value--high { color: #F59E0B; }
+    .stat-box__value--medium { color: #3B82F6; }
+
+    .stat-box__label {
+      font-size: 0.68rem;
+      color: #64748B;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .dashboard__chart {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 100px;
+      padding: 16px 0 0;
+    }
+
+    .chart-bar {
+      flex: 1;
+      border-radius: 6px 6px 2px 2px;
+      min-height: 8px;
+      position: relative;
+    }
+
+    .chart-bar--1 { height: 45%; background: linear-gradient(180deg, #3B82F6, #2563EB); }
+    .chart-bar--2 { height: 72%; background: linear-gradient(180deg, #7C3AED, #6D28D9); }
+    .chart-bar--3 { height: 35%; background: linear-gradient(180deg, #3B82F6, #2563EB); }
+    .chart-bar--4 { height: 88%; background: linear-gradient(180deg, #EF4444, #DC2626); }
+    .chart-bar--5 { height: 55%; background: linear-gradient(180deg, #F59E0B, #D97706); }
+    .chart-bar--6 { height: 40%; background: linear-gradient(180deg, #3B82F6, #2563EB); }
+    .chart-bar--7 { height: 65%; background: linear-gradient(180deg, #7C3AED, #6D28D9); }
+    .chart-bar--8 { height: 28%; background: linear-gradient(180deg, #10B981, #059669); }
+
+    .dashboard__findings {
+      margin-top: 20px;
+    }
+
+    .finding-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .finding-row:last-child { border-bottom: none; }
+
+    .finding__severity {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .finding__severity--critical { background: #EF4444; box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+    .finding__severity--high { background: #F59E0B; box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+    .finding__severity--medium { background: #3B82F6; box-shadow: 0 0 8px rgba(59,130,246,0.3); }
+
+    .finding__name {
+      font-size: 0.78rem;
+      font-weight: 500;
+      flex: 1;
+    }
+
+    .finding__tag {
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    .finding__tag--critical { background: rgba(239,68,68,0.15); color: #EF4444; }
+    .finding__tag--high { background: rgba(245,158,11,0.15); color: #F59E0B; }
+    .finding__tag--medium { background: rgba(59,130,246,0.15); color: #3B82F6; }
+
+    /* =========================================
+       PROCESS
+       ========================================= */
+    .process {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0 100px;
+    }
+
+    .process__header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .process__steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+    }
+
+    .process__steps::before {
+      content: '';
+      position: absolute;
+      top: 32px;
+      left: calc(12.5% + 16px);
+      right: calc(12.5% + 16px);
+      height: 2px;
+      background: linear-gradient(90deg, #3B82F6, #7C3AED, #3B82F6, #7C3AED);
+      z-index: 0;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      padding: 0 16px;
+    }
+
+    .step__number {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3B82F6, #7C3AED);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 0 auto 20px;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+    }
+
+    .step__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step__desc {
+      font-size: 0.85rem;
+      color: #94A3B8;
+      line-height: 1.6;
+    }
+
+    /* =========================================
+       COMPLIANCE
+       ========================================= */
+    .compliance {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0 100px;
+    }
+
+    .compliance__header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: auto auto;
+      gap: 16px;
+    }
+
+    .bento-card {
+      padding: 28px 24px;
+      cursor: default;
+    }
+
+    .bento-card--lg {
+      grid-column: span 2;
+    }
+
+    .bento-card__indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-bottom: 16px;
+    }
+
+    .bento-card__indicator--blue { background: #3B82F6; box-shadow: 0 0 12px rgba(59,130,246,0.4); }
+    .bento-card__indicator--purple { background: #7C3AED; box-shadow: 0 0 12px rgba(124,58,237,0.4); }
+    .bento-card__indicator--green { background: #10B981; box-shadow: 0 0 12px rgba(16,185,129,0.4); }
+    .bento-card__indicator--amber { background: #F59E0B; box-shadow: 0 0 12px rgba(245,158,11,0.4); }
+    .bento-card__indicator--red { background: #EF4444; box-shadow: 0 0 12px rgba(239,68,68,0.4); }
+
+    .bento-card__title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .bento-card__desc {
+      color: #94A3B8;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .bento-card__controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .control-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: #CBD5E1;
+    }
+
+    /* =========================================
+       CTA
+       ========================================= */
+    .cta {
+      position: relative;
+      z-index: 1;
+      padding: 100px 0;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .cta__orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      pointer-events: none;
+    }
+
+    .cta__orb--1 {
+      width: 500px;
+      height: 500px;
+      background: #3B82F6;
+      opacity: 0.12;
+      top: -30%;
+      left: 10%;
+    }
+
+    .cta__orb--2 {
+      width: 400px;
+      height: 400px;
+      background: #7C3AED;
+      opacity: 0.1;
+      bottom: -30%;
+      right: 10%;
+    }
+
+    .cta__heading {
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 24px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta__note {
+      color: #64748B;
+      font-size: 0.85rem;
+      margin-top: 20px;
+    }
+
+    /* =========================================
+       CONTACT FORM
+       ========================================= */
+    .contact {
+      position: relative;
+      z-index: 1;
+      padding: 80px 0 100px;
+    }
+
+    .contact__header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .contact__form-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 36px 32px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #CBD5E1;
+      margin-bottom: 8px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: #475569;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: rgba(59,130,246,0.5);
+      background: rgba(255,255,255,0.07);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+
+    .form-select option {
+      background: #10132A;
+      color: #fff;
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .form-submit {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    /* =========================================
+       FOOTER
+       ========================================= */
+    .footer {
+      position: relative;
+      z-index: 1;
+      padding: 60px 0 40px;
+      border-top: 1px solid transparent;
+      background-image: linear-gradient(#0B0D17, #0B0D17), linear-gradient(90deg, #3B82F6, #7C3AED, #3B82F6);
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+
+    .footer__inner {
+      display: grid;
+      grid-template-columns: 1.5fr repeat(3, 1fr);
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .footer__brand-desc {
+      color: #64748B;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      margin-top: 12px;
+      max-width: 280px;
+    }
+
+    .footer__heading {
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #94A3B8;
+      margin-bottom: 20px;
+    }
+
+    .footer__links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer__link {
+      color: #64748B;
+      font-size: 0.88rem;
+      transition: color 0.3s ease;
+    }
+
+    .footer__link:hover { color: #fff; }
+
+    .footer__bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .footer__copy {
+      color: #475569;
+      font-size: 0.8rem;
+    }
+
+    .footer__socials {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer__social {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748B;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+
+    .footer__social:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+
+    /* =========================================
+       RESPONSIVE
+       ========================================= */
+    @media (max-width: 1024px) {
+      .services__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .features__inner {
+        grid-template-columns: 1fr;
+        gap: 48px;
+      }
+
+      .features__visual {
+        order: -1;
+        max-width: 480px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .bento-card--lg {
+        grid-column: span 2;
+      }
+
+      .footer__inner {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav__links,
+      .nav__cta {
+        display: none;
+      }
+
+      .mobile-toggle {
+        display: flex;
+      }
+
+      .hero {
+        padding: 140px 0 60px;
+      }
+
+      .hero__heading {
+        font-size: clamp(2.2rem, 8vw, 3rem);
+      }
+
+      .services__grid {
+        grid-template-columns: 1fr;
+      }
+
+      .process__steps {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .process__steps::before {
+        display: none;
+      }
+
+      .bento-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bento-card--lg {
+        grid-column: span 1;
+      }
+
+      .footer__inner {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .footer__bottom {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+      }
+
+      .contact__form-wrap {
+        padding: 28px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero__buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .hero__buttons .btn-gradient,
+      .hero__buttons .btn-glass {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .trust__pills {
+        gap: 10px;
+      }
+
+      .trust__pill {
+        padding: 10px 16px;
+        font-size: 0.78rem;
+      }
+
+      .dashboard__stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Gradient Mesh -->
+  <div class="bg-mesh" aria-hidden="true">
+    <div class="bg-orb bg-orb--1"></div>
+    <div class="bg-orb bg-orb--2"></div>
+    <div class="bg-orb bg-orb--3"></div>
+  </div>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header">
+    <div class="header__inner">
+      <a href="#" class="logo">
+        <span class="logo__icon"><i class="fa-solid fa-lock"></i></span>
+        <span class="gradient-text">Barracoder</span>
+      </a>
+
+      <nav class="nav">
+        <ul class="nav__links">
+          <li><a href="#services" class="nav__link">Services</a></li>
+          <li><a href="#features" class="nav__link">Why Us</a></li>
+          <li><a href="#process" class="nav__link">Process</a></li>
+          <li><a href="#compliance" class="nav__link">Compliance</a></li>
+          <li><a href="#contact" class="nav__link">Contact</a></li>
+        </ul>
+        <a href="#contact" class="btn-gradient nav__cta">Start Assessment</a>
+      </nav>
+
+      <div class="mobile-toggle" onclick="document.querySelector('.mobile-nav').classList.add('active')" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav -->
+  <div class="mobile-nav">
+    <div class="mobile-nav__close" onclick="document.querySelector('.mobile-nav').classList.remove('active')" aria-label="Close menu">&times;</div>
+    <a href="#services" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Services</a>
+    <a href="#features" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Why Us</a>
+    <a href="#process" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Process</a>
+    <a href="#compliance" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Compliance</a>
+    <a href="#contact" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Contact</a>
+    <a href="#contact" class="btn-gradient" onclick="document.querySelector('.mobile-nav').classList.remove('active')">Start Assessment</a>
+  </div>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero">
+    <div class="hero__orb hero__orb--1" aria-hidden="true"></div>
+    <div class="hero__orb hero__orb--2" aria-hidden="true"></div>
+    <div class="container">
+      <div class="hero__badge">
+        <i class="fa-solid fa-shield-halved"></i>
+        Trusted by 500+ organizations
+      </div>
+      <h1 class="hero__heading">
+        Penetration Testing<br>That <span class="gradient-text">Drives Compliance</span>
+      </h1>
+      <p class="hero__sub">
+        Modern security assessments built for organizations that demand rigor, transparency, and actionable results. Expert-led testing aligned to the frameworks that matter.
+      </p>
+      <div class="hero__buttons">
+        <a href="#contact" class="btn-gradient">
+          Get Started
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        <a href="#process" class="btn-glass">
+          <i class="fa-solid fa-play"></i>
+          Watch Demo
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TRUST BAR ========== -->
+  <section class="trust">
+    <div class="container">
+      <p class="trust__label">Aligned to leading compliance frameworks</p>
+      <div class="trust__pills">
+        <div class="trust__pill">
+          <i class="fa-solid fa-credit-card pill-icon--pci"></i>
+          PCI DSS
+        </div>
+        <div class="trust__pill">
+          <i class="fa-solid fa-clipboard-check pill-icon--soc"></i>
+          SOC 2
+        </div>
+        <div class="trust__pill">
+          <i class="fa-solid fa-heart-pulse pill-icon--hipaa"></i>
+          HIPAA
+        </div>
+        <div class="trust__pill">
+          <i class="fa-solid fa-building-columns pill-icon--nist"></i>
+          NIST
+        </div>
+        <div class="trust__pill">
+          <i class="fa-solid fa-certificate pill-icon--iso"></i>
+          ISO 27001
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SERVICES ========== -->
+  <section class="services" id="services">
+    <div class="container">
+      <div class="services__header">
+        <span class="section-label"><i class="fa-solid fa-crosshairs"></i> Services</span>
+        <h2 class="section-heading">What We Test</h2>
+        <p class="section-sub" style="margin: 0 auto;">Comprehensive offensive security engagements across your entire attack surface.</p>
+        <div class="services__heading-underline"></div>
+      </div>
+
+      <div class="services__grid">
+        <!-- Card 1 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-globe"></i></div>
+          <h3 class="service-card__title">Web App Pentest</h3>
+          <p class="service-card__desc">Thorough testing of web applications against OWASP Top 10 and beyond. We uncover injection flaws, authentication bypasses, and business logic vulnerabilities.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 2 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+          <h3 class="service-card__title">Mobile App Pentest</h3>
+          <p class="service-card__desc">iOS and Android security assessments covering insecure data storage, certificate pinning, API communication, and reverse engineering resistance.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 3 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-plug"></i></div>
+          <h3 class="service-card__title">API Pentest</h3>
+          <p class="service-card__desc">REST, GraphQL, and gRPC API security testing. We probe authentication, authorization, rate limiting, and data exposure across your endpoints.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 4 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-cloud"></i></div>
+          <h3 class="service-card__title">Cloud Pentest</h3>
+          <p class="service-card__desc">AWS, Azure, and GCP infrastructure assessments. Misconfigurations, IAM weaknesses, storage exposure, and privilege escalation paths.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 5 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-brands fa-microsoft"></i></div>
+          <h3 class="service-card__title">M365 Pentest</h3>
+          <p class="service-card__desc">Microsoft 365 and Azure AD security assessments. We test tenant configurations, mailbox delegation, Teams security, and conditional access policies.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <!-- Card 6 -->
+        <div class="glass-card service-card">
+          <div class="service-card__icon"><i class="fa-solid fa-code"></i></div>
+          <h3 class="service-card__title">Source Code Review</h3>
+          <p class="service-card__desc">Manual and tool-assisted source code analysis identifying security flaws before deployment. We review architecture patterns and cryptographic implementations.</p>
+          <a href="#contact" class="service-card__link">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FEATURES / WHY ========== -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features__inner">
+        <div class="features__content">
+          <span class="section-label"><i class="fa-solid fa-sparkles"></i> Why Barracoder</span>
+          <h2 class="section-heading">Security Meets<br><span class="gradient-text">Simplicity</span></h2>
+          <p class="section-sub">We combine deep offensive expertise with a modern delivery experience. No bloated PDFs, no vague findings — just clear, prioritized, actionable results.</p>
+
+          <div class="features__list">
+            <div class="feature-item">
+              <div class="feature-item__icon"><i class="fa-solid fa-user-shield"></i></div>
+              <div>
+                <h3 class="feature-item__title">Expert-Led Testing</h3>
+                <p class="feature-item__desc">Every engagement is conducted by seasoned penetration testers with deep specialization — not automated scanners repackaged as assessments.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-item__icon"><i class="fa-solid fa-list-check"></i></div>
+              <div>
+                <h3 class="feature-item__title">Compliance Mapped Results</h3>
+                <p class="feature-item__desc">Findings are mapped directly to the compliance controls that matter to your auditors — PCI DSS, SOC 2, HIPAA, and more — out of the box.</p>
+              </div>
+            </div>
+            <div class="feature-item">
+              <div class="feature-item__icon"><i class="fa-solid fa-wrench"></i></div>
+              <div>
+                <h3 class="feature-item__title">Actionable Remediation</h3>
+                <p class="feature-item__desc">Every finding includes precise remediation guidance with code snippets, configuration examples, and verification steps your team can act on immediately.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Mockup -->
+        <div class="features__visual">
+          <div class="dashboard-mock">
+            <div class="dashboard__header">
+              <span class="dashboard__title">Assessment Dashboard</span>
+              <div class="dashboard__dots">
+                <span class="dashboard__dot dashboard__dot--red"></span>
+                <span class="dashboard__dot dashboard__dot--yellow"></span>
+                <span class="dashboard__dot dashboard__dot--green"></span>
+              </div>
+            </div>
+
+            <div class="dashboard__stats">
+              <div class="stat-box">
+                <div class="stat-box__value stat-box__value--critical">3</div>
+                <div class="stat-box__label">Critical</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box__value stat-box__value--high">8</div>
+                <div class="stat-box__label">High</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box__value stat-box__value--medium">14</div>
+                <div class="stat-box__label">Medium</div>
+              </div>
+            </div>
+
+            <div class="dashboard__chart">
+              <div class="chart-bar chart-bar--1"></div>
+              <div class="chart-bar chart-bar--2"></div>
+              <div class="chart-bar chart-bar--3"></div>
+              <div class="chart-bar chart-bar--4"></div>
+              <div class="chart-bar chart-bar--5"></div>
+              <div class="chart-bar chart-bar--6"></div>
+              <div class="chart-bar chart-bar--7"></div>
+              <div class="chart-bar chart-bar--8"></div>
+            </div>
+
+            <div class="dashboard__findings">
+              <div class="finding-row">
+                <span class="finding__severity finding__severity--critical"></span>
+                <span class="finding__name">SQL Injection — User Search</span>
+                <span class="finding__tag finding__tag--critical">Critical</span>
+              </div>
+              <div class="finding-row">
+                <span class="finding__severity finding__severity--high"></span>
+                <span class="finding__name">Broken Access Control — Admin API</span>
+                <span class="finding__tag finding__tag--high">High</span>
+              </div>
+              <div class="finding-row">
+                <span class="finding__severity finding__severity--medium"></span>
+                <span class="finding__name">Missing Rate Limiting — Auth</span>
+                <span class="finding__tag finding__tag--medium">Medium</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PROCESS ========== -->
+  <section class="process" id="process">
+    <div class="container">
+      <div class="process__header">
+        <span class="section-label"><i class="fa-solid fa-route"></i> Methodology</span>
+        <h2 class="section-heading">How It Works</h2>
+        <p class="section-sub" style="margin: 0 auto;">A structured, transparent engagement process from scoping to verified remediation.</p>
+      </div>
+
+      <div class="process__steps">
+        <div class="step">
+          <div class="step__number">1</div>
+          <h3 class="step__title">Scope</h3>
+          <p class="step__desc">We define target assets, testing windows, compliance requirements, and rules of engagement collaboratively.</p>
+        </div>
+        <div class="step">
+          <div class="step__number">2</div>
+          <h3 class="step__title">Test</h3>
+          <p class="step__desc">Expert testers execute manual and tool-assisted testing, simulating real-world attacker techniques against your systems.</p>
+        </div>
+        <div class="step">
+          <div class="step__number">3</div>
+          <h3 class="step__title">Report</h3>
+          <p class="step__desc">You receive a detailed report with prioritized findings, evidence, compliance mapping, and precise remediation guidance.</p>
+        </div>
+        <div class="step">
+          <div class="step__number">4</div>
+          <h3 class="step__title">Remediate</h3>
+          <p class="step__desc">We verify your fixes with targeted retesting and provide an updated attestation letter for your auditors.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== COMPLIANCE ========== -->
+  <section class="compliance" id="compliance">
+    <div class="container">
+      <div class="compliance__header">
+        <span class="section-label"><i class="fa-solid fa-scale-balanced"></i> Frameworks</span>
+        <h2 class="section-heading">Built for <span class="gradient-text">Compliance</span></h2>
+        <p class="section-sub" style="margin: 0 auto;">Every assessment maps findings to the controls your auditors care about.</p>
+      </div>
+
+      <div class="bento-grid">
+        <!-- PCI DSS - Large -->
+        <div class="glass-card bento-card bento-card--lg">
+          <div class="bento-card__indicator bento-card__indicator--blue"></div>
+          <h3 class="bento-card__title">PCI DSS v4.0</h3>
+          <p class="bento-card__desc">Complete penetration testing aligned to PCI DSS Requirements 6 and 11. We deliver the evidence and attestation artifacts your QSA needs for compliance validation.</p>
+          <div class="bento-card__controls">
+            <span class="control-tag">Req 6.2</span>
+            <span class="control-tag">Req 6.3</span>
+            <span class="control-tag">Req 11.3</span>
+            <span class="control-tag">Req 11.4</span>
+            <span class="control-tag">ASV Scans</span>
+          </div>
+        </div>
+        <!-- SOC 2 -->
+        <div class="glass-card bento-card">
+          <div class="bento-card__indicator bento-card__indicator--purple"></div>
+          <h3 class="bento-card__title">SOC 2</h3>
+          <p class="bento-card__desc">Testing mapped to Trust Service Criteria for your Type II audit evidence.</p>
+          <div class="bento-card__controls">
+            <span class="control-tag">CC6.1</span>
+            <span class="control-tag">CC7.1</span>
+            <span class="control-tag">CC7.2</span>
+          </div>
+        </div>
+        <!-- HIPAA -->
+        <div class="glass-card bento-card">
+          <div class="bento-card__indicator bento-card__indicator--green"></div>
+          <h3 class="bento-card__title">HIPAA</h3>
+          <p class="bento-card__desc">Security Rule technical safeguard assessment covering ePHI protection.</p>
+          <div class="bento-card__controls">
+            <span class="control-tag">§164.312(a)</span>
+            <span class="control-tag">§164.312(e)</span>
+          </div>
+        </div>
+        <!-- NIST -->
+        <div class="glass-card bento-card">
+          <div class="bento-card__indicator bento-card__indicator--amber"></div>
+          <h3 class="bento-card__title">NIST 800-53</h3>
+          <p class="bento-card__desc">Control testing for federal and regulated environments.</p>
+          <div class="bento-card__controls">
+            <span class="control-tag">CA-8</span>
+            <span class="control-tag">RA-5</span>
+            <span class="control-tag">SI-3</span>
+          </div>
+        </div>
+        <!-- ISO -->
+        <div class="glass-card bento-card">
+          <div class="bento-card__indicator bento-card__indicator--red"></div>
+          <h3 class="bento-card__title">ISO 27001</h3>
+          <p class="bento-card__desc">Annex A control validation for ISMS certification support.</p>
+          <div class="bento-card__controls">
+            <span class="control-tag">A.12.6</span>
+            <span class="control-tag">A.14.2</span>
+            <span class="control-tag">A.18.2</span>
+          </div>
+        </div>
+        <!-- Extra filler for grid balance -->
+        <div class="glass-card bento-card bento-card--lg">
+          <div class="bento-card__indicator bento-card__indicator--blue"></div>
+          <h3 class="bento-card__title">Custom Frameworks</h3>
+          <p class="bento-card__desc">Need testing aligned to a different framework or internal policy? We map findings to any control set — HITRUST, FedRAMP, CIS Benchmarks, or your own security standards.</p>
+          <div class="bento-card__controls">
+            <span class="control-tag">HITRUST</span>
+            <span class="control-tag">FedRAMP</span>
+            <span class="control-tag">CIS</span>
+            <span class="control-tag">Custom</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CTA ========== -->
+  <section class="cta">
+    <div class="cta__orb cta__orb--1" aria-hidden="true"></div>
+    <div class="cta__orb cta__orb--2" aria-hidden="true"></div>
+    <div class="container">
+      <h2 class="cta__heading">Ready to <span class="gradient-text">Elevate</span> Your Security?</h2>
+      <p class="section-sub" style="margin: 0 auto 32px; text-align: center;">
+        Talk to our team about a tailored penetration testing engagement built for your compliance requirements.
+      </p>
+      <a href="#contact" class="btn-gradient" style="font-size: 1rem; padding: 16px 40px;">
+        Schedule a Consultation
+        <i class="fa-solid fa-arrow-right"></i>
+      </a>
+      <p class="cta__note">No commitment. Free consultation.</p>
+    </div>
+  </section>
+
+  <!-- ========== CONTACT FORM ========== -->
+  <section class="contact" id="contact">
+    <div class="container">
+      <div class="contact__header">
+        <span class="section-label"><i class="fa-solid fa-envelope"></i> Get In Touch</span>
+        <h2 class="section-heading">Start Your Assessment</h2>
+        <p class="section-sub" style="margin: 0 auto;">Tell us about your environment and we'll scope a tailored engagement.</p>
+      </div>
+
+      <div class="glass-card contact__form-wrap">
+        <form onsubmit="return false;">
+          <div class="form-group">
+            <label class="form-label" for="name">Full Name</label>
+            <input type="text" id="name" class="form-input" placeholder="Jane Smith">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">Work Email</label>
+            <input type="email" id="email" class="form-input" placeholder="jane@company.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="company">Company</label>
+            <input type="text" id="company" class="form-input" placeholder="Acme Corp">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="service">Service Interest</label>
+            <select id="service" class="form-select">
+              <option value="" disabled selected>Select a service</option>
+              <option value="webapp">Web Application Pentest</option>
+              <option value="mobile">Mobile Application Pentest</option>
+              <option value="api">API Pentest</option>
+              <option value="cloud">Cloud Infrastructure Pentest</option>
+              <option value="m365">M365 / Azure AD Pentest</option>
+              <option value="code">Source Code Review</option>
+              <option value="multiple">Multiple Services</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="message">Message</label>
+            <textarea id="message" class="form-textarea" placeholder="Tell us about your environment, timeline, and compliance requirements..."></textarea>
+          </div>
+          <button type="submit" class="btn-gradient form-submit">
+            Send Request
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <a href="#" class="logo" style="margin-bottom: 4px;">
+            <span class="logo__icon"><i class="fa-solid fa-lock"></i></span>
+            <span class="gradient-text">Barracoder</span>
+          </a>
+          <p class="footer__brand-desc">Expert-led penetration testing and security assessments that deliver compliance-ready results.</p>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Services</h4>
+          <ul class="footer__links">
+            <li><a href="#services" class="footer__link">Web App Pentest</a></li>
+            <li><a href="#services" class="footer__link">Mobile App Pentest</a></li>
+            <li><a href="#services" class="footer__link">API Pentest</a></li>
+            <li><a href="#services" class="footer__link">Cloud Pentest</a></li>
+            <li><a href="#services" class="footer__link">Source Code Review</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Compliance</h4>
+          <ul class="footer__links">
+            <li><a href="#compliance" class="footer__link">PCI DSS</a></li>
+            <li><a href="#compliance" class="footer__link">SOC 2</a></li>
+            <li><a href="#compliance" class="footer__link">HIPAA</a></li>
+            <li><a href="#compliance" class="footer__link">NIST 800-53</a></li>
+            <li><a href="#compliance" class="footer__link">ISO 27001</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Company</h4>
+          <ul class="footer__links">
+            <li><a href="#features" class="footer__link">About</a></li>
+            <li><a href="#process" class="footer__link">Methodology</a></li>
+            <li><a href="#contact" class="footer__link">Contact</a></li>
+            <li><a href="#" class="footer__link">Privacy Policy</a></li>
+            <li><a href="#" class="footer__link">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p class="footer__copy">&copy; 2026 Barracoder Security. All rights reserved.</p>
+        <div class="footer__socials">
+          <a href="#" class="footer__social" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+          <a href="#" class="footer__social" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#" class="footer__social" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+          <a href="#" class="footer__social" aria-label="Mastodon"><i class="fa-brands fa-mastodon"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
